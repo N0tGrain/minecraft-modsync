@@ -3,6 +3,7 @@ package com.n0tgrain.modsyncbackend.controllers;
 import com.n0tgrain.modsyncbackend.dtos.CustomUserRequest;
 import com.n0tgrain.modsyncbackend.models.CustomUser;
 import com.n0tgrain.modsyncbackend.services.CustomUserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class CustomUserController {
 
 
     @PostMapping
-    public CustomUser createUser(@RequestBody CustomUserRequest request) {
+    public CustomUser createUser(@Valid @RequestBody CustomUserRequest request) {
         return customUserService.createUser(
                 request.username,
                 request.email,
