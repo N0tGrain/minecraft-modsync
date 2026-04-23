@@ -30,8 +30,8 @@ public class CustomUserController {
 
     // For testing purposes :D
     @GetMapping("/me")
-    public String getCurrentUser() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+    public CustomUser getCurrentUser() {
+        return (CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
 }

@@ -18,12 +18,16 @@ public class CustomUser {
     private String email;
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     public CustomUser() {}
 
     public CustomUser(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.role = Role.USER;
     }
 
 }
