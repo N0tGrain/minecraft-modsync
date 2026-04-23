@@ -3,6 +3,7 @@ package com.n0tgrain.modsyncbackend.services;
 import com.n0tgrain.modsyncbackend.config.JWTService;
 import com.n0tgrain.modsyncbackend.dtos.LoginRequest;
 import com.n0tgrain.modsyncbackend.dtos.RegisterRequest;
+import com.n0tgrain.modsyncbackend.dtos.UserResponse;
 import com.n0tgrain.modsyncbackend.exceptions.CustomUserException;
 import com.n0tgrain.modsyncbackend.models.CustomUser;
 import com.n0tgrain.modsyncbackend.repositories.CustomUserRepository;
@@ -62,13 +63,26 @@ public class AuthService {
         return jwtService.generateToken(customUser.getUsername());
     }
 
-    public List<CustomUser> getAllCustomUsers() {
-        loggerService.logInfo(SecurityContextHolder.getContext().getAuthentication().getName() + " just fetched all users");
-        return customUserRepository.findAll();
+    public List<UserResponse> getAllCustomUsers() {
+        return customUserRepository.findAll().stream().map(this::mapToResponse).toList();
     }
 
-    public CustomUser getCustomUserById(Long id) {
-        loggerService.logInfo(SecurityContextHolder.getContext().getAuthentication().getName() + " just fetched user with id: " + id);
-        return customUserRepository.findById(id).orElse(null);
+    public UserResponse getCustomUserById(Long id) {
+        CustomUser user = customUserRepository.findById(id).orElseThrow(() -> new CustomUserException("Custom user not found"));
+        return mapToResponse(user);
+    }
+
+    private UserResponse mapToResponse(CustomUser user) {
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole()
+        );
+    }
+
+    public UserResponse getCurrentUser() {
+        CustomUser user = (CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return mapToResponse(user);
     }
 }

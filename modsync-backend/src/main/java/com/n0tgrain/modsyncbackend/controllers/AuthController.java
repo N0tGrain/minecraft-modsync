@@ -22,12 +22,12 @@ public class AuthController {
     @PostMapping("/register")
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
-        return new AuthResponse("User registered successfully!");
+        return new AuthResponse("User registered successfully!", request.username, "USER");
     }
 
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         String token = authService.login(request);
-        return new AuthResponse(token);
+        return new AuthResponse(token, request.username, "USER");
     }
 }
