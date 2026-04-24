@@ -1,16 +1,21 @@
 package com.n0tgrain.modsyncbackend.repositories;
 
-import com.n0tgrain.modsyncbackend.models.CustomUser;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.n0tgrain.modsyncbackend.models.CustomUser;
 
 @Repository
 public interface CustomUserRepository extends JpaRepository<CustomUser, Long> {
 
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-    Optional<CustomUser> findByUsername(String username);
+
+    @Query("select u from CustomUser u join fetch u.role where u.username = :username")
+    Optional<CustomUser> findByUsername(@Param("username") String username);
 
 }

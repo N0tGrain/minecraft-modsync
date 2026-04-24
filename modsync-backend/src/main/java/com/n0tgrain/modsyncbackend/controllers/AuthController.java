@@ -3,6 +3,7 @@ package com.n0tgrain.modsyncbackend.controllers;
 import com.n0tgrain.modsyncbackend.dtos.AuthResponse;
 import com.n0tgrain.modsyncbackend.dtos.LoginRequest;
 import com.n0tgrain.modsyncbackend.dtos.RegisterRequest;
+import com.n0tgrain.modsyncbackend.models.RoleEnum;
 import com.n0tgrain.modsyncbackend.services.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class AuthController {
     @PostMapping("/register")
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
-        return new AuthResponse("User registered successfully!", request.username, "USER");
+        return new AuthResponse("User registered successfully!", request.username, RoleEnum.USER.name());
     }
 
     @PostMapping("/login")

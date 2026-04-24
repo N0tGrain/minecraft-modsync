@@ -1,17 +1,21 @@
 package com.n0tgrain.modsyncbackend.services;
 
+import java.util.List;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.n0tgrain.modsyncbackend.config.JWTService;
 import com.n0tgrain.modsyncbackend.dtos.LoginRequest;
 import com.n0tgrain.modsyncbackend.dtos.RegisterRequest;
 import com.n0tgrain.modsyncbackend.dtos.UserResponse;
 import com.n0tgrain.modsyncbackend.exceptions.CustomUserException;
 import com.n0tgrain.modsyncbackend.models.CustomUser;
+import com.n0tgrain.modsyncbackend.models.Role;
+import com.n0tgrain.modsyncbackend.models.RoleEnum;
 import com.n0tgrain.modsyncbackend.repositories.CustomUserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
+import com.n0tgrain.modsyncbackend.repositories.RoleRepository;
 
 @Service
 public class AuthService {
@@ -21,13 +25,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final LoggerService loggerService;
+    private final RoleRepository roleRepository;
 
-    public AuthService(CustomUserRepository customUserRepository, CredentialValidator credentialValidator, PasswordEncoder passwordEncoder, JWTService jwtService, LoggerService loggerService) {
+    public AuthService(CustomUserRepository customUserRepository, CredentialValidator credentialValidator, PasswordEncoder passwordEncoder, JWTService jwtService, LoggerService loggerService, RoleRepository roleRepository) {
         this.customUserRepository = customUserRepository;
         this.credentialValidator = credentialValidator;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.loggerService = loggerService;
+        this.roleRepository = roleRepository;
     }
 
     public void register(RegisterRequest request) {
@@ -45,7 +51,8 @@ public class AuthService {
 
         String hashedPassword = passwordEncoder.encode(request.password);
 
-        CustomUser customUser = new CustomUser(request.username, request.email, hashedPassword);
+        Role userRole = roleRepository.findByRoleName(RoleEnum.USER.getRoleName()).orElseThrow(() -> new CustomUserException("Default role not found"));
+        CustomUser customUser = new CustomUser(request.username, request.email, hashedPassword, userRole);
         customUserRepository.save(customUser);
         loggerService.logInfo(customUser.getUsername() + " succesfully created an account");
     }
@@ -77,12 +84,20 @@ public class AuthService {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole().getRoleName()
         );
     }
 
     public UserResponse getCurrentUser() {
-        CustomUser user = (CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == null) {
+            throw new CustomUserException("No authenticated user found");
+        }
+
+        if (!(authentication.getPrincipal() instanceof CustomUser user)) {
+            throw new CustomUserException("Authenticated principal is not a valid user");
+        }
+
         return mapToResponse(user);
     }
 }
