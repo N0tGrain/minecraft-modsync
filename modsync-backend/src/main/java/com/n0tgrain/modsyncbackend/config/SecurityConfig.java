@@ -32,8 +32,8 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/mods/**", "/users/**").hasAuthority(RoleEnum.USER.getRoleName())
                         .requestMatchers("/admin/**").hasAuthority(RoleEnum.ADMIN.getRoleName())
-                        .requestMatchers("/users/**").hasAuthority(RoleEnum.USER.getRoleName())
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

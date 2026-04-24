@@ -20,6 +20,10 @@ public class ModrinthService {
         this.modRepository = modRepository;
     }
 
+    public List<Mod> fetchAllMods() {
+        return this.modRepository.findAll();
+    }
+
     public List<Mod> importMods(String query) {
         String url = "https://api.modrinth.com/v2/search?query=" + query;
         Map response = restTemplate.getForObject(url, Map.class);

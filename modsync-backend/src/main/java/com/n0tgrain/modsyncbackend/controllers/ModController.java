@@ -1,7 +1,10 @@
 package com.n0tgrain.modsyncbackend.controllers;
 
+import com.n0tgrain.modsyncbackend.models.Mod;
 import com.n0tgrain.modsyncbackend.services.ModrinthService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/mods")
@@ -12,6 +15,11 @@ public class ModController {
 
     public ModController(ModrinthService modrinthService) {
         this.modrinthService = modrinthService;
+    }
+
+    @GetMapping
+    public List<Mod> fetchMods() {
+        return modrinthService.fetchAllMods();
     }
 
     @GetMapping("/import")
