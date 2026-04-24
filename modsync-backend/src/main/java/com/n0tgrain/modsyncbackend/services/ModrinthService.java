@@ -1,5 +1,6 @@
 package com.n0tgrain.modsyncbackend.services;
 
+import com.n0tgrain.modsyncbackend.exceptions.CustomModException;
 import com.n0tgrain.modsyncbackend.models.Mod;
 import com.n0tgrain.modsyncbackend.repositories.ModRepository;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,10 @@ public class ModrinthService {
 
     public List<Mod> fetchAllMods() {
         return this.modRepository.findAll();
+    }
+
+    public Mod fetchByExternalId(String externalId) {
+        return modRepository.findByExternalId(externalId).orElseThrow(() -> new CustomModException("Mod with " + externalId + " not found in the db"));
     }
 
     public List<Mod> importMods(String query) {
