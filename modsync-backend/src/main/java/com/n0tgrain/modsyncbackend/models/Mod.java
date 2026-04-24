@@ -12,7 +12,7 @@ public class Mod {
     private Long id;
 
     private String name;
-    private String slug;
+    private Long curseforgeProjectId;
 
     @OneToMany(mappedBy = "mod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ModVersion> versions;

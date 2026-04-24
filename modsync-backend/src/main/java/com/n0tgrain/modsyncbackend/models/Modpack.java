@@ -15,7 +15,15 @@ public class Modpack {
     private String description;
     private String minecraftVersion;
 
-    @OneToMany(mappedBy = "modpack", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "modpack", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ModpackMod> mods;
 
+    public Modpack() {}
+
+    public Modpack(String name, String description, String minecraftVersion, List<ModpackMod> mods) {
+        this.name = name;
+        this.description = description;
+        this.minecraftVersion = minecraftVersion;
+        this.mods = mods;
+    }
 }

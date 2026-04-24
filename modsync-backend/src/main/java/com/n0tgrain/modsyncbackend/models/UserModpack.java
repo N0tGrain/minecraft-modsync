@@ -9,9 +9,18 @@ public class UserModpack {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
+    @JoinColumn(name = "user_id")
     private CustomUser user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("modpackId")
+    @JoinColumn(name = "modpack_id")
     private Modpack modpack;
+
+    public UserModpack() {}
+
+    public UserModpack(CustomUser user, Modpack modpack) {
+        this.user = user;
+        this.modpack = modpack;
+    }
 }
