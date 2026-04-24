@@ -1,7 +1,11 @@
 package com.n0tgrain.modsyncbackend.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 public class UserModpack {
     @EmbeddedId
