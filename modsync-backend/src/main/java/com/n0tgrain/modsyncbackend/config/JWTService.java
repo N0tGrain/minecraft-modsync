@@ -25,14 +25,14 @@ public class JWTService {
                 .withClaim("username", username)
                 .withIssuedAt(new Date())
                 .withExpiresAt(this.createExpirationDate())
-                .withIssuer("Opheleia")
+                .withIssuer("Modsync")
                 .sign(Algorithm.HMAC256(SECRET));
     }
 
     public String validateTokenAndRetrieveSubject(String token) throws JWTVerificationException {
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256(SECRET))
                 .withSubject("User Details")
-                .withIssuer("Opheleia")
+                .withIssuer("Modsync")
                 .build();
         DecodedJWT jwt = verifier.verify(token);
         return jwt.getClaim("username").asString();

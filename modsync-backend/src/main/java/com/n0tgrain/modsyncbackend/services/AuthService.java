@@ -59,10 +59,10 @@ public class AuthService {
 
     public String login(LoginRequest request) {
         CustomUser customUser = customUserRepository.findByUsername(request.username)
-                .orElseThrow(() -> new CustomUserException("Invalid username of password"));
+                .orElseThrow(() -> new CustomUserException("Invalid username or password"));
 
         if (!passwordEncoder.matches(request.password, customUser.getPassword())) {
-            loggerService.logError(customUser.getUsername() + "tried to login with incorrect details");
+            loggerService.logError(customUser.getUsername() + " tried to login with incorrect details");
             throw new CustomUserException("Invalid username or password");
         }
 
@@ -75,8 +75,25 @@ public class AuthService {
     }
 
     public UserResponse getCustomUserById(Long id) {
-        CustomUser user = customUserRepository.findById(id).orElseThrow(() -> new CustomUserException("Custom user not found"));
-        return mapToResponse(user);
+        CustomUser requestedUser = customUserRepository.findById(id).orElseThrow(() -> new CustomUserException("Custom user not found"));
+
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new CustomUserException("Unauthorized");
+        }
+        if (!(authentication.getPrincipal() instanceof CustomUser user)) {
+            throw new CustomUserException("Invalid authentication principal");
+        }
+
+        String role = user.getRole().getRoleName();
+        boolean isAdmin = role.equals(RoleEnum.ADMIN.getRoleName());
+        boolean isThemselves = user.getId().equals(id);
+
+        if (!isAdmin && !isThemselves) {
+            throw new CustomUserException("You are not allowed to access this user");
+        }
+
+        return mapToResponse(requestedUser);
     }
 
     private UserResponse mapToResponse(CustomUser user) {
