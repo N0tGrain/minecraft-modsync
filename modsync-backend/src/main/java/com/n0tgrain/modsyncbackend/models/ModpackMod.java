@@ -26,11 +26,14 @@ public class ModpackMod {
     @JoinColumn(name = "mod_version_id")
     private ModVersion modVersion;
 
+    private boolean required = true;
+
     public ModpackMod() {}
 
-    public ModpackMod(Modpack modpack, Mod mod, ModVersion modVersion) {
+    public ModpackMod(Modpack modpack, Mod mod, ModVersion modVersion, boolean required) {
         this.modpack = modpack;
         this.mod = mod;
         this.modVersion = modVersion;
+        this.required = required;
     }
 }
