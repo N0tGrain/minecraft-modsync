@@ -70,8 +70,17 @@ public class ModpackService {
             throw new CustomModpackException("Mod version already added to modpack");
         }
 
-        Modpack modpack = modpackRepository.findById(modpackId).orElseThrow(() -> new CustomModpackException("Modpack not found"));
-        ModVersion modVersion = modVersionRepository.findById(request.modVersionId).orElseThrow(() -> new CustomModException("Mod version not found"));
+        Modpack modpack = modpackRepository.findById(modpackId)
+                .orElseThrow(() -> new CustomModpackException("Modpack not found"));
+        ModVersion modVersion = modVersionRepository.findById(request.modVersionId)
+                .orElseThrow(() -> new CustomModException("Mod version not found"));
+
+        validateCompatibility(modpack, modVersion);
+        boolean alreadyExists = modpack.getMods().stream().anyMatch(existing -> existing.getModVersion().getId().equals(modVersion.getId()));
+        if (alreadyExists) {
+            throw new CustomModpackException("Mod already added to the modpack");
+        }
+
         ModpackMod modpackMod = new ModpackMod();
 
         modpackMod.setId(new ModpackModId(modpack.getId(), modVersion.getId()));
@@ -81,8 +90,25 @@ public class ModpackService {
         modpackMod.setRequired(request.required);
 
         modpack.getMods().add(modpackMod);
-        //        modpackModRepository.save(modpackMod);
 
         return modpack;
+    }
+
+    private void validateCompatibility(Modpack modpack, ModVersion modVersion) {
+        if (modVersion.getMinecraftVersion() == null ||
+                !modVersion.getMinecraftVersion()
+                        .equalsIgnoreCase(modpack.getMinecraftVersion())) {
+            throw new CustomModpackException("Minecraft version mistmatch. " +
+                    "Modpack uses " + modpack.getMinecraftVersion() +
+                    " but mod supports " + modVersion.getMinecraftVersion());
+        }
+
+        if (modVersion.getLoader() == null ||
+                !modVersion.getLoader()
+                        .equalsIgnoreCase(modpack.getLoader())) {
+            throw new CustomModpackException("Loader mismatch. " +
+                    "Modpack uses " + modpack.getLoader() +
+                    " but mod supports " + modVersion.getLoader());
+        }
     }
 }
