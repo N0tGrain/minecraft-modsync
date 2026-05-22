@@ -15,10 +15,13 @@ public class ModVersion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
+    private String externalVersionId;
     private String version;
+    private String minecraftVersion;
+    private String loader;
     private String fileUrl;
     private Date releaseDate;
-    private Long curseforgeFileId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mod_id")
@@ -26,11 +29,13 @@ public class ModVersion {
 
     public ModVersion() {}
 
-    public ModVersion(String version, String fileUrl, Date releaseDate, Long curseforgeFileId, Mod mod) {
+    public ModVersion(String externalVersionId, String version, String minecraftVersion, String loader, String fileUrl, Date releaseDate, Mod mod) {
+        this.externalVersionId = externalVersionId;
         this.version = version;
+        this.minecraftVersion = minecraftVersion;
+        this.loader = loader;
         this.fileUrl = fileUrl;
         this.releaseDate = releaseDate;
-        this.curseforgeFileId = curseforgeFileId;
         this.mod = mod;
     }
 }

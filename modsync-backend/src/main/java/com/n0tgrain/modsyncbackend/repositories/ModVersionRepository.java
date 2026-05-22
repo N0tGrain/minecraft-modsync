@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ModVersionRepository extends JpaRepository<ModVersion, Long> {}
+public interface ModVersionRepository extends JpaRepository<ModVersion, Long> {
+    boolean existsByExternalVersionId(String externalVersionId);
+}

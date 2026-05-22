@@ -22,7 +22,7 @@ public class ModController {
         return modrinthService.fetchAllMods();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/external/{id}")
     public Mod fetchModByExternalId(@PathVariable String id) {
         return modrinthService.fetchByExternalId(id);
     }
@@ -30,5 +30,11 @@ public class ModController {
     @GetMapping("/import")
     public Object searchMods(@RequestParam String query) {
         return modrinthService.importMods(query);
+    }
+
+    @PostMapping("/import-versions")
+    public String importVersions() {
+        modrinthService.importVersionsForAllMods();
+        return "Versions have been imported!";
     }
 }
