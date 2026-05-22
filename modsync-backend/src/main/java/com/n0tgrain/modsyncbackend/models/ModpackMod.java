@@ -10,7 +10,7 @@ import lombok.Setter;
 public class ModpackMod {
 
     @EmbeddedId
-    private ModpackModId id;
+    private ModpackModId id = new ModpackModId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("modpackId")
@@ -18,11 +18,7 @@ public class ModpackMod {
     private Modpack modpack;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("modId")
-    @JoinColumn(name = "mod_id")
-    private Mod mod;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("modVersionId")
     @JoinColumn(name = "mod_version_id")
     private ModVersion modVersion;
 
@@ -30,9 +26,8 @@ public class ModpackMod {
 
     public ModpackMod() {}
 
-    public ModpackMod(Modpack modpack, Mod mod, ModVersion modVersion, boolean required) {
+    public ModpackMod(Modpack modpack, ModVersion modVersion, boolean required) {
         this.modpack = modpack;
-        this.mod = mod;
         this.modVersion = modVersion;
         this.required = required;
     }
