@@ -22,7 +22,10 @@ public class Modpack {
     private String description;
     private String minecraftVersion;
     private String loader;
-    private boolean isPublic = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Visibility visibility = Visibility.PRIVATE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
@@ -33,12 +36,12 @@ public class Modpack {
 
     public Modpack() {}
 
-    public Modpack(String name, String description, String minecraftVersion, String loader, boolean isPublic, CustomUser owner, List<ModpackMod> mods) {
+    public Modpack(String name, String description, String minecraftVersion, String loader, Visibility visibility, CustomUser owner, List<ModpackMod> mods) {
         this.name = name;
         this.description = description;
         this.minecraftVersion = minecraftVersion;
         this.loader = loader;
-        this.isPublic = isPublic;
+        this.visibility = visibility;
         this.owner = owner;
         this.mods = mods;
     }

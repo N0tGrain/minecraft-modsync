@@ -1,17 +1,24 @@
 package com.n0tgrain.modsyncbackend.services;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
 import com.n0tgrain.modsyncbackend.dtos.AddModToModpackRequest;
 import com.n0tgrain.modsyncbackend.dtos.ModpackRequest;
 import com.n0tgrain.modsyncbackend.dtos.ModpackResponseDTO;
 import com.n0tgrain.modsyncbackend.exceptions.CustomModException;
 import com.n0tgrain.modsyncbackend.exceptions.CustomModpackException;
 import com.n0tgrain.modsyncbackend.exceptions.CustomUserException;
-import com.n0tgrain.modsyncbackend.models.*;
+import com.n0tgrain.modsyncbackend.models.CustomUser;
+import com.n0tgrain.modsyncbackend.models.ModVersion;
+import com.n0tgrain.modsyncbackend.models.Modpack;
+import com.n0tgrain.modsyncbackend.models.ModpackMod;
+import com.n0tgrain.modsyncbackend.models.ModpackModId;
+import com.n0tgrain.modsyncbackend.models.Visibility;
+import com.n0tgrain.modsyncbackend.repositories.CustomUserRepository;
 import com.n0tgrain.modsyncbackend.repositories.ModVersionRepository;
 import com.n0tgrain.modsyncbackend.repositories.ModpackModRepository;
 import com.n0tgrain.modsyncbackend.repositories.ModpackRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ModpackService {
@@ -19,11 +26,15 @@ public class ModpackService {
     private final ModpackRepository modpackRepository;
     private final ModVersionRepository modVersionRepository;
     private final ModpackModRepository modpackModRepository;
+    private final FriendService friendService;
+    private final CustomUserRepository customUserRepository;
 
-    public ModpackService(ModpackRepository modpackRepository, ModVersionRepository modVersionRepository, ModpackModRepository modpackModRepository) {
+    public ModpackService(ModpackRepository modpackRepository, ModVersionRepository modVersionRepository, ModpackModRepository modpackModRepository, FriendService friendService, CustomUserRepository customUserRepository) {
         this.modpackRepository = modpackRepository;
         this.modVersionRepository = modVersionRepository;
         this.modpackModRepository = modpackModRepository;
+        this.friendService = friendService;
+        this.customUserRepository = customUserRepository;
     }
 
     public ModpackResponseDTO createModpack(ModpackRequest modpackRequest) {
@@ -45,7 +56,7 @@ public class ModpackService {
         modpack.setDescription(modpackRequest.description);
         modpack.setLoader(modpackRequest.loader);
         modpack.setMinecraftVersion(modpackRequest.minecraftVersion);
-        modpack.setPublic(Boolean.TRUE.equals(modpackRequest.isPublic));
+        modpack.setVisibility(modpackRequest.visibility != null ? modpackRequest.visibility : Visibility.PRIVATE);
         modpack.setOwner(user);
 
         Modpack saved = modpackRepository.save(modpack);
@@ -60,7 +71,7 @@ public class ModpackService {
         response.description = modpack.getDescription();
         response.minecraftVersion = modpack.getMinecraftVersion();
         response.loader = modpack.getLoader();
-        response.isPublic = modpack.isPublic();
+        response.visibility = modpack.getVisibility();
         response.ownerUsername = modpack.getOwner().getUsername();
 
         return response;
@@ -99,7 +110,8 @@ public class ModpackService {
 
     public java.util.List<ModpackResponseDTO> getAccessibleModpacks() {
         CustomUser currentUser = getAuthenticatedUser();
-        return modpackRepository.findByOwnerIdOrIsPublicTrue(currentUser.getId()).stream()
+        return modpackRepository.findAll().stream()
+                .filter(modpack -> canAccessModpack(modpack, currentUser))
                 .map(this::mapToResponse)
                 .toList();
     }
@@ -108,7 +120,8 @@ public class ModpackService {
         Modpack modpack = modpackRepository.findById(modpackId)
                 .orElseThrow(() -> new CustomModpackException("Modpack not found"));
         CustomUser currentUser = getAuthenticatedUser();
-        if (!modpack.isPublic() && !modpack.getOwner().getId().equals(currentUser.getId())) {
+        
+        if (!canAccessModpack(modpack, currentUser)) {
             throw new CustomModpackException("Modpack is not accessible");
         }
         return mapToResponse(modpack);
@@ -126,7 +139,7 @@ public class ModpackService {
         modpack.setDescription(modpackRequest.description);
         modpack.setLoader(modpackRequest.loader);
         modpack.setMinecraftVersion(modpackRequest.minecraftVersion);
-        modpack.setPublic(Boolean.TRUE.equals(modpackRequest.isPublic));
+        modpack.setVisibility(modpackRequest.visibility != null ? modpackRequest.visibility : Visibility.PRIVATE);
 
         Modpack saved = modpackRepository.save(modpack);
         return mapToResponse(saved);
@@ -169,5 +182,54 @@ public class ModpackService {
                     "Modpack uses " + modpack.getLoader() +
                     " but mod supports " + modVersion.getLoader());
         }
+    }
+
+    private boolean canAccessModpack(Modpack modpack, CustomUser currentUser) {
+        // Owner can always access their own modpack
+        if (modpack.getOwner().getId().equals(currentUser.getId())) {
+            return true;
+        }
+
+        // PUBLIC modpacks are accessible to anyone
+        if (modpack.getVisibility() == Visibility.PUBLIC) {
+            return true;
+        }
+
+        // FRIENDS_ONLY modpacks are accessible only to friends
+        if (modpack.getVisibility() == Visibility.FRIENDS_ONLY) {
+            return friendService.areFriendsWith(modpack.getOwner().getId(), currentUser.getId());
+        }
+
+        // PRIVATE modpacks are not accessible
+        return false;
+    }
+
+    public java.util.List<ModpackResponseDTO> getUserModpacks(Long userId) {
+        CustomUser targetUser = customUserRepository.findById(userId)
+                .orElseThrow(() -> new CustomUserException("User not found"));
+        CustomUser currentUser = getAuthenticatedUser();
+
+        return modpackRepository.findAccessibleModpacksByUser(userId).stream()
+                .filter(modpack -> {
+                    // Owner can see all their modpacks
+                    if (modpack.getOwner().getId().equals(currentUser.getId())) {
+                        return true;
+                    }
+
+                    // If modpack is PUBLIC, everyone can see it
+                    if (modpack.getVisibility() == Visibility.PUBLIC) {
+                        return true;
+                    }
+
+                    // If modpack is FRIENDS_ONLY, only friends can see it
+                    if (modpack.getVisibility() == Visibility.FRIENDS_ONLY) {
+                        return friendService.areFriendsWith(userId, currentUser.getId());
+                    }
+
+                    // PRIVATE modpacks are not visible
+                    return false;
+                })
+                .map(this::mapToResponse)
+                .toList();
     }
 }
