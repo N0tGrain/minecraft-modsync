@@ -2,6 +2,9 @@ package com.n0tgrain.modsyncbackend.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.n0tgrain.modsyncbackend.dtos.AddModToModpackRequest;
 import com.n0tgrain.modsyncbackend.dtos.ModpackRequest;
 import com.n0tgrain.modsyncbackend.dtos.ModpackResponseDTO;
+import com.n0tgrain.modsyncbackend.dtos.modrinth.ModrinthIndexDTO;
 import com.n0tgrain.modsyncbackend.models.Modpack;
 import com.n0tgrain.modsyncbackend.services.ModpackService;
+import com.n0tgrain.modsyncbackend.services.ModrinthExportService;
 
 import jakarta.validation.Valid;
 
@@ -26,9 +31,11 @@ import jakarta.validation.Valid;
 public class ModpackController {
 
     private final ModpackService modpackService;
+    private final ModrinthExportService modrinthExportService;
 
-    public ModpackController(ModpackService modpackService) {
+    public ModpackController(ModpackService modpackService, ModrinthExportService modrinthExportService) {
         this.modpackService = modpackService;
+        this.modrinthExportService = modrinthExportService;
     }
 
     @PostMapping
@@ -59,6 +66,24 @@ public class ModpackController {
     @DeleteMapping("/{id}")
     public void deleteModpack(@PathVariable Long id) {
         modpackService.deleteModpack(id);
+    }
+
+    @GetMapping("/{id}/export/modrinth/index")
+    public ModrinthIndexDTO exportModrinthIndex(@PathVariable Long id) {
+        return modrinthExportService.generateModrinthIndex(id);
+    }
+
+    @GetMapping("/{id}/export/modrinth/zip")
+    public ResponseEntity<byte[]> exportModrinthZip(@PathVariable Long id) throws Exception {
+        byte[] zipContent = modrinthExportService.exportModpackAsZip(id);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf("application/x-modrinth-modpack+zip"));
+        headers.setContentDispositionFormData("attachment", "modpack.mrpack");
+        
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(zipContent);
     }
 
     @PostMapping("/{id}/mods")
