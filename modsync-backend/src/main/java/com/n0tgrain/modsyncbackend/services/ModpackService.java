@@ -45,6 +45,7 @@ public class ModpackService {
         modpack.setDescription(modpackRequest.description);
         modpack.setLoader(modpackRequest.loader);
         modpack.setMinecraftVersion(modpackRequest.minecraftVersion);
+        modpack.setPublic(Boolean.TRUE.equals(modpackRequest.isPublic));
         modpack.setOwner(user);
 
         Modpack saved = modpackRepository.save(modpack);
@@ -59,6 +60,7 @@ public class ModpackService {
         response.description = modpack.getDescription();
         response.minecraftVersion = modpack.getMinecraftVersion();
         response.loader = modpack.getLoader();
+        response.isPublic = modpack.isPublic();
         response.ownerUsername = modpack.getOwner().getUsername();
 
         return response;
@@ -90,8 +92,65 @@ public class ModpackService {
         modpackMod.setRequired(request.required);
 
         modpack.getMods().add(modpackMod);
+        modpackRepository.save(modpack);
 
         return modpack;
+    }
+
+    public java.util.List<ModpackResponseDTO> getAccessibleModpacks() {
+        CustomUser currentUser = getAuthenticatedUser();
+        return modpackRepository.findByOwnerIdOrIsPublicTrue(currentUser.getId()).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    public ModpackResponseDTO getModpack(Long modpackId) {
+        Modpack modpack = modpackRepository.findById(modpackId)
+                .orElseThrow(() -> new CustomModpackException("Modpack not found"));
+        CustomUser currentUser = getAuthenticatedUser();
+        if (!modpack.isPublic() && !modpack.getOwner().getId().equals(currentUser.getId())) {
+            throw new CustomModpackException("Modpack is not accessible");
+        }
+        return mapToResponse(modpack);
+    }
+
+    public ModpackResponseDTO updateModpack(Long modpackId, ModpackRequest modpackRequest) {
+        Modpack modpack = modpackRepository.findById(modpackId)
+                .orElseThrow(() -> new CustomModpackException("Modpack not found"));
+        CustomUser currentUser = getAuthenticatedUser();
+        if (!modpack.getOwner().getId().equals(currentUser.getId())) {
+            throw new CustomModpackException("You are not allowed to update this modpack");
+        }
+
+        modpack.setName(modpackRequest.name);
+        modpack.setDescription(modpackRequest.description);
+        modpack.setLoader(modpackRequest.loader);
+        modpack.setMinecraftVersion(modpackRequest.minecraftVersion);
+        modpack.setPublic(Boolean.TRUE.equals(modpackRequest.isPublic));
+
+        Modpack saved = modpackRepository.save(modpack);
+        return mapToResponse(saved);
+    }
+
+    public void deleteModpack(Long modpackId) {
+        Modpack modpack = modpackRepository.findById(modpackId)
+                .orElseThrow(() -> new CustomModpackException("Modpack not found"));
+        CustomUser currentUser = getAuthenticatedUser();
+        if (!modpack.getOwner().getId().equals(currentUser.getId())) {
+            throw new CustomModpackException("You are not allowed to delete this modpack");
+        }
+        modpackRepository.delete(modpack);
+    }
+
+    private CustomUser getAuthenticatedUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == null) {
+            throw new CustomUserException("Unauthorized");
+        }
+        if (!(authentication.getPrincipal() instanceof CustomUser user)) {
+            throw new CustomUserException("Invalid authentication principal");
+        }
+        return user;
     }
 
     private void validateCompatibility(Modpack modpack, ModVersion modVersion) {

@@ -14,4 +14,6 @@ public class ModpackRequest {
 
     @NotBlank
     public String loader;
+
+    public Boolean isPublic;
 }

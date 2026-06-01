@@ -6,5 +6,6 @@ public class ModpackResponseDTO {
     public String description;
     public String minecraftVersion;
     public String loader;
+    public boolean isPublic;
     public String ownerUsername;
 }

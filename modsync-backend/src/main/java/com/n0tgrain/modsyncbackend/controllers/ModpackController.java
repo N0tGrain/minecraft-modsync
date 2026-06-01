@@ -8,6 +8,8 @@ import com.n0tgrain.modsyncbackend.services.ModpackService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/modpacks")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -22,6 +24,26 @@ public class ModpackController {
     @PostMapping
     public ModpackResponseDTO createModpack(@Valid @RequestBody ModpackRequest request) {
         return this.modpackService.createModpack(request);
+    }
+
+    @GetMapping
+    public List<ModpackResponseDTO> getModpacks() {
+        return modpackService.getAccessibleModpacks();
+    }
+
+    @GetMapping("/{id}")
+    public ModpackResponseDTO getModpack(@PathVariable Long id) {
+        return modpackService.getModpack(id);
+    }
+
+    @PutMapping("/{id}")
+    public ModpackResponseDTO updateModpack(@PathVariable Long id, @Valid @RequestBody ModpackRequest request) {
+        return modpackService.updateModpack(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteModpack(@PathVariable Long id) {
+        modpackService.deleteModpack(id);
     }
 
     @PostMapping("/{id}/mods")
