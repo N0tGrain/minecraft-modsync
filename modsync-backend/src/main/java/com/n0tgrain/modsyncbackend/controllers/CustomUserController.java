@@ -33,6 +33,7 @@ public class CustomUserController {
     }
 
     // For testing purposes :D
+    @PreAuthorize("hasAuthority(T(com.n0tgrain.modsyncbackend.models.RoleEnum).USER.getRoleName())")
     @GetMapping("/me")
     public UserResponse getCurrentUser() {
         return authService.getCurrentUser();
