@@ -1,0 +1,102 @@
+<div class="mod-detail-container">
+  <div class="back-navigation">
+    <a routerLink="/mods">← Back to Mods</a>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">
+      <p>Loading mod details...</p>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">
+      <p>{{ errorMessage() }}</p>
+      <button (click)="retry()" type="button">Retry</button>
+    </div>
+  }
+
+  @if (!isLoading() && !errorMessage() && mod(); as modData) {
+    <div class="mod-detail">
+      <div class="mod-header">
+        <div class="mod-icon-large">
+          @if (modData.iconUrl) {
+            <img
+              [src]="modData.iconUrl"
+              [alt]="modData.name"
+            />
+          } @else {
+            <div class="no-icon">No Icon</div>
+          }
+        </div>
+
+        <div class="mod-header-content">
+          <h1>{{ modData.name }}</h1>
+          <p class="slug">{{ modData.slug }}</p>
+          <div class="downloads-badge">
+            {{ modData.downloads | number }} downloads
+          </div>
+        </div>
+      </div>
+
+      <div class="mod-body">
+        <section class="description-section">
+          <h2>Description</h2>
+          <p>{{ modData.description }}</p>
+        </section>
+
+        @if (modData.categories.length > 0) {
+          <section class="categories-section">
+            <h2>Categories</h2>
+            <div class="categories-list">
+              @for (category of modData.categories; track category) {
+                <span class="category">{{ category }}</span>
+              }
+            </div>
+          </section>
+        }
+
+        <section class="info-section">
+          <h2>Information</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>External ID:</label>
+              <code>{{ modData.externalId }}</code>
+            </div>
+            <div class="info-item">
+              <label>Database ID:</label>
+              <code>{{ modData.id }}</code>
+            </div>
+          </div>
+        </section>
+
+        @if (modData.versions && modData.versions.length > 0) {
+          <section class="versions-section">
+            <h2>Versions ({{ modData.versions.length }})</h2>
+            <div class="versions-list">
+              @for (version of modData.versions; track version.id) {
+                <div class="version-item">
+                  <strong>{{ version.versionNumber }}</strong>
+                  @if (version.minecraftVersions) {
+                    <div class="minecraft-versions">
+                      @for (mcVersion of version.minecraftVersions; track mcVersion) {
+                        <span class="mc-version">{{ mcVersion }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    </div>
+  }
+
+  @if (!isLoading() && !errorMessage() && !mod()) {
+    <div class="not-found">
+      <p>Mod not found.</p>
+      <a routerLink="/mods">Back to Mods</a>
+    </div>
+  }
+</div>

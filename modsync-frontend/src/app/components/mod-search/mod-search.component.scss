@@ -1,0 +1,159 @@
+/* Minimal styling - layout only */
+
+.mod-search-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.search-header {
+  margin-bottom: 30px;
+}
+
+.search-header h1 {
+  margin: 0 0 20px 0;
+  font-size: 28px;
+}
+
+.search-box {
+  display: flex;
+  gap: 10px;
+}
+
+.search-box input {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-box button {
+  padding: 10px 15px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+}
+
+.loading,
+.error,
+.no-results {
+  padding: 20px;
+  text-align: center;
+}
+
+.error {
+  border: 1px solid #ff6b6b;
+  background-color: #ffe0e0;
+  border-radius: 4px;
+}
+
+.error button {
+  padding: 8px 12px;
+  margin-top: 10px;
+  cursor: pointer;
+  border: 1px solid #cc0000;
+  border-radius: 4px;
+  background: white;
+}
+
+.mods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.mod-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  align-items: flex-start;
+}
+
+.mod-icon {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mod-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-icon {
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+}
+
+.mod-content {
+  flex: 1;
+}
+
+.mod-content h2 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.description {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.mod-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.downloads {
+  font-size: 13px;
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.category {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: #f0f0f0;
+  border-radius: 12px;
+}
+
+.mod-actions {
+  flex-shrink: 0;
+}
+
+.view-button {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #0066cc;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+}
+
+.view-button:hover {
+  background: #0052a3;
+}

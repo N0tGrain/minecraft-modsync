@@ -1,0 +1,79 @@
+<div class="mod-search-container">
+  <div class="search-header">
+    <h1>Mods</h1>
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Search mods by name or description..."
+        [value]="searchQuery()"
+        (input)="onSearchChange($any($event).target.value)"
+        aria-label="Search mods"
+      />
+      @if (searchQuery()) {
+        <button (click)="clearSearch()" type="button">Clear</button>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">
+      <p>Loading mods...</p>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">
+      <p>{{ errorMessage() }}</p>
+      <button (click)="ngOnInit()" type="button">Retry</button>
+    </div>
+  }
+
+  @if (!isLoading() && !errorMessage()) {
+    <div class="mods-list">
+      @if (filteredMods().length === 0) {
+        <div class="no-results">
+          <p>No mods found.</p>
+        </div>
+      }
+
+      @for (mod of filteredMods(); track mod.id) {
+        <div class="mod-item">
+          <div class="mod-icon">
+            @if (mod.iconUrl) {
+              <img
+                [src]="mod.iconUrl"
+                [alt]="mod.name"
+                loading="lazy"
+              />
+            } @else {
+              <div class="no-icon">No Icon</div>
+            }
+          </div>
+
+          <div class="mod-content">
+            <h2>{{ mod.name }}</h2>
+            <p class="description">{{ mod.description }}</p>
+            <div class="mod-metadata">
+              <span class="downloads">📥 {{ mod.downloads | number }}</span>
+              <div class="categories">
+                @for (category of mod.categories; track category) {
+                  <span class="category">{{ category }}</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="mod-actions">
+            <a
+              [routerLink]="['/mods', mod.externalId]"
+              class="view-button"
+              [attr.aria-label]="'View details for ' + mod.name"
+            >
+              View Details
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
