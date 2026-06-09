@@ -1,5 +1,6 @@
 package com.n0tgrain.modsyncbackend.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,7 @@ public class ModVersion {
     private String fileUrl;
     private Date releaseDate;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mod_id")
     private Mod mod;

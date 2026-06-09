@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Mod } from '../models/mod.model';
+import { environment } from '../../environments/environment';
 
 /**
  * Service for handling all mod-related API calls.
@@ -11,7 +12,7 @@ import { Mod } from '../models/mod.model';
   providedIn: 'root',
 })
 export class ModsApiService {
-  private readonly apiBaseUrl: string = 'http://localhost:8080/api/mods';
+  private readonly apiBaseUrl: string = environment.baseUrl + '/mods';
 
   public constructor(private readonly http: HttpClient) {}
 

@@ -63,10 +63,6 @@
               <label>External ID:</label>
               <code>{{ modData.externalId }}</code>
             </div>
-            <div class="info-item">
-              <label>Database ID:</label>
-              <code>{{ modData.id }}</code>
-            </div>
           </div>
         </section>
 
@@ -75,15 +71,14 @@
             <h2>Versions ({{ modData.versions.length }})</h2>
             <div class="versions-list">
               @for (version of modData.versions; track version.id) {
+                <span>{{version}}</span>
                 <div class="version-item">
                   <strong>{{ version.versionNumber }}</strong>
-                  @if (version.minecraftVersions) {
-                    <div class="minecraft-versions">
-                      @for (mcVersion of version.minecraftVersions; track mcVersion) {
-                        <span class="mc-version">{{ mcVersion }}</span>
-                      }
-                    </div>
-                  }
+                  <div class="minecraft-versions">
+                    @for (mcVersion of version.minecraftVersions; track mcVersion) {
+                      <span class="mc-version">{{ mcVersion }}</span>
+                    }
+                  </div>
                 </div>
               }
             </div>

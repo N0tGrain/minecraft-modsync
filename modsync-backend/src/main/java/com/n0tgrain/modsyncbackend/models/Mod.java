@@ -1,5 +1,6 @@
 package com.n0tgrain.modsyncbackend.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,7 @@ public class Mod {
     @ElementCollection
     private List<String> categories;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "mod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ModVersion> versions;
 
