@@ -45,7 +45,10 @@ export class ModSearchComponent implements OnInit {
 
     this.modsApiService.fetchAllMods().subscribe({
       next: (data: Mod[]): void => {
-        this.mods.set(data);
+
+        const sortedMods: Mod[] = [...data].sort((a, b) => b.downloads - a.downloads);
+
+        this.mods.set(sortedMods);
         this.filteredMods.set(data);
         this.isLoading.set(false);
       },
