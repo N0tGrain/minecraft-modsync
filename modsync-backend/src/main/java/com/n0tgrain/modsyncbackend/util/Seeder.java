@@ -42,7 +42,7 @@ public class Seeder {
         testMod.setDescription("This is a test mod");
         testMod.setName("Test Mod");
         testMod.setIconUrl("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2IxaTV3eDZndnNtcm56MDB6emh4dzU1dXBmdDQ5d3ZjY204cmlsdyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/sthmCnCpfr8M8jtTQy/giphy.gif");
-        testMod.setExternalId("yapyap2035982356834yapyap");
+        testMod.setExternalId("LNytGWDc");
         testMod.setSlug("yap yap");
         testMod.setDownloads(42069);
         this.modRepository.save(testMod);
