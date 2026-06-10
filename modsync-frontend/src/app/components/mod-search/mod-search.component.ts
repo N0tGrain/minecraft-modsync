@@ -55,6 +55,7 @@ export class ModSearchComponent implements OnInit {
         this.isLoading.set(false);
       },
     });
+    this.modsApiService.importVersionsForAllMods();
   }
 
   /**

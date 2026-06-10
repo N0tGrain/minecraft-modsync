@@ -49,10 +49,7 @@ export class ModDetailComponent implements OnInit {
 
     this.modsApiService.fetchModByExternalId(externalId).subscribe({
       next: (data: Mod): void => {
-        console.log(data);
-        console.log(data.versions);
         this.mod.set(data);
-        console.log(this.mod()!.versions!);
         this.isLoading.set(false);
       },
       error: (error: any): void => {

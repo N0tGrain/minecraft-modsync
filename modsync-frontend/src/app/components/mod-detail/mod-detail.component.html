@@ -70,15 +70,11 @@
           <section class="versions-section">
             <h2>Versions ({{ modData.versions.length }})</h2>
             <div class="versions-list">
-              @for (version of modData.versions; track version.id) {
-                <span>{{version}}</span>
+              @for (version of modData.versions; track version) {
                 <div class="version-item">
-                  <strong>{{ version.versionNumber }}</strong>
-                  <div class="minecraft-versions">
-                    @for (mcVersion of version.minecraftVersions; track mcVersion) {
-                      <span class="mc-version">{{ mcVersion }}</span>
-                    }
-                  </div>
+                  <span><strong>{{ version.minecraftVersion }}</strong> ({{version.version}})</span>
+                  <p>{{version.loader}}</p>
+                  <p>Release date: {{version.releaseDate}}</p>
                 </div>
               }
             </div>

@@ -18,9 +18,10 @@ export interface Mod {
  */
 export interface ModVersion {
   id: number;
-  modId: number;
   externalVersionId: string;
-  versionNumber: string;
-  minecraftVersions?: string[];
-  releaseType?: string;
+  version: string;
+  minecraftVersion?: string;
+  loader?: string;
+  fileUrl?: string;
+  releaseDate: Date;
 }
