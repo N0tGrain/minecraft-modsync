@@ -74,7 +74,7 @@
                 <div class="version-item">
                   <span><strong>{{ version.minecraftVersion }}</strong> ({{version.version}})</span>
                   <p>{{version.loader}}</p>
-                  <p>Release date: {{version.releaseDate}}</p>
+                  <p>Release date: {{version.releaseDate | date: 'dd-MM-yyyy'}}</p>
                 </div>
               }
             </div>
