@@ -28,7 +28,7 @@ public class ModController {
     }
 
     @GetMapping("/import")
-    public Object searchMods(@RequestParam String query) {
+    public List<Mod> searchMods(@RequestParam String query) {
         return modrinthService.importMods(query);
     }
 
