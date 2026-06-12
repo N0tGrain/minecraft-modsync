@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ModrinthService {
@@ -83,19 +80,50 @@ public class ModrinthService {
 
     public List<ModVersion> importVersions(Mod mod) {
         String url = "https://api.modrinth.com/v2/project/" + mod.getExternalId() + "/version";
+
         List<Map<String, Object>> response = restTemplate.getForObject(url, List.class);
+
+        if (response == null || response.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        response.sort((a, b) -> {
+            Instant dateA = Instant.parse((String) a.get("date_published"));
+            Instant dateB = Instant.parse((String) b.get("date_published"));
+            return dateB.compareTo(dateA);
+        });
+
+        Set<String> processedMinecraftVersions = new HashSet<>();
         List<ModVersion> savedVersions = new ArrayList<>();
 
         for (Map<String, Object> versionData : response) {
+
+            List<String> gameVersions = ((List<String>) versionData.get("game_versions"))
+                    .stream()
+                    .filter(this::isStableMinecraftVersion)
+                    .toList();
+
+            if (gameVersions.isEmpty()) {
+                continue;
+            }
+
+            boolean hasNewMinecraftVersion = gameVersions.stream().anyMatch(v -> !processedMinecraftVersions.contains(v));
+            if (!hasNewMinecraftVersion) continue;
             String externalVersionId = (String) versionData.get("id");
+
             if (modVersionRepository.existsByExternalVersionId(externalVersionId)) {
                 continue;
             }
+
             ModVersion modVersion = mapToModVersion(versionData, mod);
             savedVersions.add(modVersionRepository.save(modVersion));
+            processedMinecraftVersions.addAll(gameVersions);
         }
-
         return savedVersions;
+    }
+
+    private boolean isStableMinecraftVersion(String version) {
+        return version.matches("\\d+(\\.\\d+)*");
     }
 
     private ModVersion mapToModVersion(Map<String, Object> versionData, Mod mod) {
