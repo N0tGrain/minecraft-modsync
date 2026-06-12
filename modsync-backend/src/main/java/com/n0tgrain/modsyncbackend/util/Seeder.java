@@ -1,11 +1,14 @@
 package com.n0tgrain.modsyncbackend.util;
 
+import com.n0tgrain.modsyncbackend.models.CustomUser;
 import com.n0tgrain.modsyncbackend.models.Mod;
 import com.n0tgrain.modsyncbackend.models.Role;
+import com.n0tgrain.modsyncbackend.repositories.CustomUserRepository;
 import com.n0tgrain.modsyncbackend.repositories.ModRepository;
 import com.n0tgrain.modsyncbackend.repositories.RoleRepository;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -16,10 +19,14 @@ public class Seeder {
 
     private final RoleRepository roleRepository;
     private final ModRepository modRepository;
+    private final CustomUserRepository customUserRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public Seeder(RoleRepository roleRepository, ModRepository modRepository) {
+    public Seeder(RoleRepository roleRepository, ModRepository modRepository, CustomUserRepository customUserRepository, PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.modRepository = modRepository;
+        this.customUserRepository = customUserRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @EventListener
@@ -33,6 +40,9 @@ public class Seeder {
 
         this.roleRepository.save(userRole);
         this.roleRepository.save(adminRole);
+
+        this.customUserRepository.save(new CustomUser("N0tBaguette", "N0tGrain@outlook.com", passwordEncoder.encode("Test123!"), userRole));
+        this.customUserRepository.save(new CustomUser("N0tBaguette_", "N0tGrain2@outlook.com", passwordEncoder.encode("Test123!"), userRole));
 
         Mod testMod = new Mod();
         List<String> categories = new ArrayList<>();
