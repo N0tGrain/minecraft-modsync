@@ -2,7 +2,6 @@ package com.n0tgrain.modsyncbackend.controllers;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +18,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/friends")
-@CrossOrigin(origins = "http://localhost:4200")
 public class FriendController {
 
     private final FriendService friendService;
