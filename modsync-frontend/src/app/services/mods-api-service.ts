@@ -24,6 +24,10 @@ export class ModsApiService {
     return this.http.get<Mod[]>(`${this.apiBaseUrl}`);
   }
 
+  public fetchAllModsAndImport(query: string): Observable<Mod[]> {
+    return this.http.get<Mod[]>(`${this.apiBaseUrl}/import`, {params: {query: query}});
+  }
+
   /**
    * Fetches a specific mod by its external ID.
    * @param externalId - The external ID of the mod (Modrinth project ID)
