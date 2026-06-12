@@ -11,10 +11,12 @@ export const routes: Routes = [
   {
     path: 'mods',
     component: ModSearchComponent,
+    canActivate: [authGuard],
   },
   {
     path: 'mods/:id',
     component: ModDetailComponent,
+    canActivate: [authGuard],
   },
   {
     path: 'login',
