@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Mod } from '../../models/mod.model';
 import { ModsApiService } from '../../services/mods-api-service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-mod-search',
@@ -20,6 +21,7 @@ export class ModSearchComponent implements OnInit {
   protected readonly searchQuery = signal<string>('');
   protected readonly isLoading = signal<boolean>(false);
   protected readonly isImporting = signal<boolean>(false);
+  protected readonly isImporting2 = signal<boolean>(false);
   protected readonly errorMessage = signal<string>('');
   protected readonly importMessage = signal<string>('');
 
@@ -110,5 +112,10 @@ export class ModSearchComponent implements OnInit {
     this.displayMods.set(
       this.filteredMods().filter((mod) => !importedIds.has(mod.externalId))
     );
+  }
+
+  protected fetchAllVersions(): void {
+    this.isImporting2.set(true);
+    this.modsApiService.importVersionsForAllMods().pipe(finalize((): void => this.isImporting2.set(false))).subscribe();
   }
 }
