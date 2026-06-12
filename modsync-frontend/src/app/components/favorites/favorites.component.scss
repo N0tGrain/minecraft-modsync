@@ -1,0 +1,34 @@
+@import '../mod-search/mod-search.component.scss';
+
+.favorites-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  h1 {
+    margin-bottom: 24px;
+  }
+
+  .empty {
+    color: #666;
+    margin-bottom: 12px;
+  }
+
+  .browse-link {
+    color: #0066cc;
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .remove-button {
+    display: block;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: white;
+    color: #cc0000;
+    border: 1px solid #cc0000;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+}

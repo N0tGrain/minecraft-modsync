@@ -1,0 +1,45 @@
+<div class="favorites-container">
+  <h1>Favorites</h1>
+
+  @if (isLoading()) {
+    <p>Loading favorites...</p>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (!isLoading() && !errorMessage()) {
+    @if (favorites().length === 0) {
+      <p class="empty">No favorite mods yet. Browse mods and save your favorites!</p>
+      <a routerLink="/mods" class="browse-link">Browse Mods</a>
+    }
+
+    <div class="mods-list">
+      @for (mod of favorites(); track mod.id) {
+        <div class="mod-item">
+          <div class="mod-icon">
+            @if (mod.iconUrl) {
+              <img [src]="mod.iconUrl" [alt]="mod.name" loading="lazy" />
+            } @else {
+              <div class="no-icon">No Icon</div>
+            }
+          </div>
+
+          <div class="mod-content">
+            <h2>{{ mod.name }}</h2>
+            <p class="description">{{ mod.description }}</p>
+            <span class="downloads">{{ mod.downloads | number }} downloads</span>
+          </div>
+
+          <div class="mod-actions">
+            <a [routerLink]="['/mods', mod.externalId]" class="view-button">View Details</a>
+            <button type="button" class="remove-button" (click)="removeFavorite(mod.externalId)">
+              Remove
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
