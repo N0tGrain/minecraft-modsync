@@ -12,8 +12,23 @@
       @if (searchQuery()) {
         <button (click)="clearSearch()" type="button">Clear</button>
       }
+      <button
+        type="button"
+        class="import-button"
+        [disabled]="!searchQuery().trim() || isImporting()"
+        (click)="importMods()"
+      >
+        {{ isImporting() ? 'Importing...' : 'Import from Modrinth' }}
+      </button>
     </div>
+    <p class="search-hint">
+      Filter existing mods with the search box, or import new mods from Modrinth.
+    </p>
   </div>
+
+  @if (importMessage()) {
+    <div class="import-message">{{ importMessage() }}</div>
+  }
 
   @if (isLoading()) {
     <div class="loading">
@@ -29,53 +44,67 @@
   }
 
   @if (!isLoading() && !errorMessage()) {
+    @if (importedMods().length > 0) {
+      <section class="imported-section">
+        <h2>Recently Imported</h2>
+        <div class="mods-list">
+          @for (mod of importedMods(); track mod.id) {
+            <div class="mod-item mod-item--new">
+              <ng-container *ngTemplateOutlet="modCard; context: { $implicit: mod }" />
+            </div>
+          }
+        </div>
+      </section>
+    }
+
     <div class="mods-list">
-      @if (filteredMods().length === 0) {
+      @if (displayMods().length === 0 && importedMods().length === 0) {
         <div class="no-results">
-          <p>No mods found.</p>
+          <p>No mods found in the local list.</p>
+          @if (searchQuery()) {
+            <p>Try importing from Modrinth to fetch new mods.</p>
+          }
         </div>
       }
 
-      @for (mod of filteredMods(); track mod.id) {
+      @for (mod of displayMods(); track mod.id) {
         <div class="mod-item">
-          <div class="mod-icon">
-            @if (mod.iconUrl) {
-              <img
-                [src]="mod.iconUrl"
-                [alt]="mod.name"
-                loading="lazy"
-              />
-            } @else {
-              <div class="no-icon">No Icon</div>
-            }
-          </div>
-
-          <div class="mod-content">
-            <h2>{{ mod.name }}</h2>
-            <p class="description">{{ mod.description }}</p>
-            <div class="mod-metadata">
-              <span class="downloads">📥 {{ mod.downloads | number }}</span>
-              <div class="categories">
-                @for (category of mod.categories; track category) {
-                  <span class="category">{{ category }}</span>
-                }
-              </div>
-            </div>
-          </div>
-
-          <div class="mod-actions">
-            <a
-              [routerLink]="['/mods', mod.externalId]"
-              class="view-button"
-              [attr.aria-label]="'View details for ' + mod.name"
-            >
-              View Details
-            </a>
-          </div>
+          <ng-container *ngTemplateOutlet="modCard; context: { $implicit: mod }" />
         </div>
       }
     </div>
-
-    <h1>This app is still under development! :)</h1>
   }
 </div>
+
+<ng-template #modCard let-mod>
+  <div class="mod-icon">
+    @if (mod.iconUrl) {
+      <img [src]="mod.iconUrl" [alt]="mod.name" loading="lazy" />
+    } @else {
+      <div class="no-icon">No Icon</div>
+    }
+  </div>
+
+  <div class="mod-content">
+    <h2>{{ mod.name }}</h2>
+    <p class="description">{{ mod.description }}</p>
+    <div class="mod-metadata">
+      <span class="downloads">{{ mod.downloads | number }} downloads</span>
+      <div class="categories">
+        @for (category of mod.categories; track category) {
+          <span class="category">{{ category }}</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="mod-actions">
+    <a
+      [routerLink]="['/mods', mod.externalId]"
+      class="view-button"
+      [attr.aria-label]="'View details for ' + mod.name"
+    >
+      View Details
+    </a>
+  </div>
+</ng-template>

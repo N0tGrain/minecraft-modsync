@@ -36,6 +36,16 @@
           <div class="downloads-badge">
             {{ modData.downloads | number }} downloads
           </div>
+          @if (isLoggedIn()) {
+            <button
+              type="button"
+              class="favorite-button"
+              [disabled]="favoriteLoading()"
+              (click)="toggleFavorite()"
+            >
+              {{ isFavorite() ? '★ Remove from Favorites' : '☆ Add to Favorites' }}
+            </button>
+          }
         </div>
       </div>
 

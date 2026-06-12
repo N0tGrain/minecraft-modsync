@@ -1,5 +1,6 @@
 package com.n0tgrain.modsyncbackend.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,5 +18,7 @@ public interface CustomUserRepository extends JpaRepository<CustomUser, Long> {
 
     @Query("select u from CustomUser u join fetch u.role where u.username = :username")
     Optional<CustomUser> findByUsername(@Param("username") String username);
+
+    List<CustomUser> findTop10ByUsernameContainingIgnoreCaseAndIdNot(String username, Long excludeId);
 
 }

@@ -77,13 +77,7 @@ public class AuthService {
     public UserResponse getCustomUserById(Long id) {
         CustomUser requestedUser = customUserRepository.findById(id).orElseThrow(() -> new CustomUserException("Custom user not found"));
 
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new CustomUserException("Unauthorized");
-        }
-        if (!(authentication.getPrincipal() instanceof CustomUser user)) {
-            throw new CustomUserException("Invalid authentication principal");
-        }
+        CustomUser user = getAuthenticatedUserFromContext();
 
         String role = user.getRole().getRoleName();
         boolean isAdmin = role.equals(RoleEnum.ADMIN.getRoleName());
@@ -105,16 +99,29 @@ public class AuthService {
         );
     }
 
+    public List<UserResponse> searchUsers(String query) {
+        CustomUser currentUser = getAuthenticatedUserFromContext();
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+        return customUserRepository.findTop10ByUsernameContainingIgnoreCaseAndIdNot(query.trim(), currentUser.getId())
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     public UserResponse getCurrentUser() {
+        return mapToResponse(getAuthenticatedUserFromContext());
+    }
+
+    private CustomUser getAuthenticatedUserFromContext() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == null) {
             throw new CustomUserException("No authenticated user found");
         }
-
         if (!(authentication.getPrincipal() instanceof CustomUser user)) {
             throw new CustomUserException("Authenticated principal is not a valid user");
         }
-
-        return mapToResponse(user);
+        return user;
     }
 }

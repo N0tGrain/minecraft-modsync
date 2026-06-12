@@ -1,0 +1,61 @@
+<div class="profile-container">
+  <h1>Profile</h1>
+
+  @if (isLoading()) {
+    <p>Loading profile...</p>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (successMessage()) {
+    <div class="success">{{ successMessage() }}</div>
+  }
+
+  @if (user(); as userData) {
+    <section class="user-info">
+      <h2>Account</h2>
+      <p><strong>Username:</strong> {{ userData.username }}</p>
+      <p><strong>Email:</strong> {{ userData.email }}</p>
+    </section>
+  }
+
+  <section class="friends-section">
+    <h2>Friends</h2>
+
+    @if (friends().length === 0) {
+      <p class="empty">No friends yet. Search for users below to add them.</p>
+    }
+
+    <ul class="friends-list">
+      @for (friend of friends(); track friend.id) {
+        <li>
+          <span>{{ friend.username }}</span>
+          <button type="button" (click)="removeFriend(friend.id)">Remove</button>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="add-friend-section">
+    <h2>Add Friend</h2>
+    <input
+      type="text"
+      placeholder="Search by username..."
+      [value]="searchQuery()"
+      (input)="onSearchChange($any($event).target.value)"
+    />
+
+    @if (searchResults().length > 0) {
+      <ul class="search-results">
+        @for (result of searchResults(); track result.id) {
+          <li>
+            <span>{{ result.username }}</span>
+            <button type="button" (click)="addFriend(result.id)">Add</button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>

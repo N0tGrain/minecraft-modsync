@@ -3,13 +3,9 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Mod } from '../../models/mod.model';
 import { ModsApiService } from '../../services/mods-api-service';
+import { FavoritesApiService } from '../../services/favorites-api.service';
+import { AuthService } from '../../services/auth.service';
 
-/**
- * Component for displaying detailed information about a specific mod.
- * Implements SOLID principles:
- * - Single Responsibility: displays mod details only
- * - Dependency Injection: relies on ModsApiService and ActivatedRoute
- */
 @Component({
   selector: 'app-mod-detail',
   standalone: true,
@@ -18,57 +14,79 @@ import { ModsApiService } from '../../services/mods-api-service';
   styleUrl: './mod-detail.component.scss',
 })
 export class ModDetailComponent implements OnInit {
-  // Reactive state using Angular signals
   protected readonly mod = signal<Mod | null>(null);
   protected readonly isLoading = signal<boolean>(false);
   protected readonly errorMessage = signal<string>('');
+  protected readonly isFavorite = signal<boolean>(false);
+  protected readonly favoriteLoading = signal<boolean>(false);
 
-  public constructor(
+  constructor(
     private readonly modsApiService: ModsApiService,
+    private readonly favoritesApiService: FavoritesApiService,
+    private readonly authService: AuthService,
     private readonly route: ActivatedRoute
   ) {}
 
-  /**
-   * Lifecycle hook: initializes component and loads mod details from route params
-   */
-  public ngOnInit(): void {
-    const externalId: string | null = this.route.snapshot.paramMap.get('id');
+  ngOnInit(): void {
+    const externalId = this.route.snapshot.paramMap.get('id');
+    if (externalId) {
+      this.loadModDetails(externalId);
+      if (this.authService.isLoggedIn()) {
+        this.loadFavoriteStatus(externalId);
+      }
+    }
+  }
+
+  toggleFavorite(): void {
+    const modData = this.mod();
+    if (!modData || !this.authService.isLoggedIn()) {
+      return;
+    }
+
+    this.favoriteLoading.set(true);
+    const action = this.isFavorite()
+      ? this.favoritesApiService.removeFavorite(modData.externalId)
+      : this.favoritesApiService.addFavorite(modData.externalId);
+
+    action.subscribe({
+      next: () => {
+        this.isFavorite.update((v) => !v);
+        this.favoriteLoading.set(false);
+      },
+      error: () => this.favoriteLoading.set(false),
+    });
+  }
+
+  retry(): void {
+    const externalId = this.route.snapshot.paramMap.get('id');
     if (externalId) {
       this.loadModDetails(externalId);
     }
   }
 
-  /**
-   * Loads the details of a specific mod by its external ID.
-   * @param externalId - The external ID of the mod
-   * @private
-   */
+  protected isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
   private loadModDetails(externalId: string): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
     this.modsApiService.fetchModByExternalId(externalId).subscribe({
-      next: (data: Mod): void => {
+      next: (data: Mod) => {
         this.mod.set(data);
         this.isLoading.set(false);
       },
-      error: (error: any): void => {
-        console.error('Error loading mod details:', error);
-        this.errorMessage.set(
-          'Failed to load mod details. Please try again.'
-        );
+      error: () => {
+        this.errorMessage.set('Failed to load mod details. Please try again.');
         this.isLoading.set(false);
       },
     });
   }
 
-  /**
-   * Handles retry action to reload mod details.
-   */
-  public retry(): void {
-    const externalId: string | null = this.route.snapshot.paramMap.get('id');
-    if (externalId) {
-      this.loadModDetails(externalId);
-    }
+  private loadFavoriteStatus(externalId: string): void {
+    this.favoritesApiService.isFavorite(externalId).subscribe({
+      next: (result) => this.isFavorite.set(result.favorite),
+    });
   }
 }

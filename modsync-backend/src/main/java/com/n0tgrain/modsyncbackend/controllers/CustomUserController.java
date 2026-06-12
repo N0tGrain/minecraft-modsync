@@ -32,11 +32,16 @@ public class CustomUserController {
         return authService.getCustomUserById(id);
     }
 
-    // For testing purposes :D
     @PreAuthorize("hasAuthority(T(com.n0tgrain.modsyncbackend.models.RoleEnum).USER.getRoleName())")
     @GetMapping("/me")
     public UserResponse getCurrentUser() {
         return authService.getCurrentUser();
+    }
+
+    @PreAuthorize("hasAuthority(T(com.n0tgrain.modsyncbackend.models.RoleEnum).USER.getRoleName())")
+    @GetMapping("/search")
+    public List<UserResponse> searchUsers(@RequestParam String query) {
+        return authService.searchUsers(query);
     }
 
 }

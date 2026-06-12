@@ -59,6 +59,35 @@
   }
 }
 
+.header__auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header__username {
+  color: white;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.header__login {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.header__logout {
+  font-family: "Minecraft", arial, sans-serif;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
 /* Mobile open state */
 .header__nav--open {
   max-height: 300px;

@@ -1,0 +1,33 @@
+<div class="auth-container">
+  <h1>Register</h1>
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  <form (ngSubmit)="onSubmit()">
+    <label>
+      Username
+      <input type="text" [(ngModel)]="username" name="username" required minlength="3" maxlength="20" />
+    </label>
+
+    <label>
+      Email
+      <input type="email" [(ngModel)]="email" name="email" required />
+    </label>
+
+    <label>
+      Password
+      <input type="password" [(ngModel)]="password" name="password" required minlength="8" />
+      <span class="hint">At least 8 characters with upper, lower, number, and special character.</span>
+    </label>
+
+    <button type="submit" [disabled]="isLoading()">
+      {{ isLoading() ? 'Creating account...' : 'Register' }}
+    </button>
+  </form>
+
+  <p class="auth-link">
+    Already have an account? <a routerLink="/login">Login</a>
+  </p>
+</div>

@@ -36,6 +36,46 @@
   background: white;
 }
 
+.import-button {
+  background: #097969 !important;
+  color: white !important;
+  border-color: #097969 !important;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.search-hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.import-message {
+  padding: 12px;
+  margin-bottom: 16px;
+  background: #e8f4f8;
+  border: 1px solid #0066cc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.imported-section {
+  margin-bottom: 24px;
+
+  h2 {
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+}
+
+.mod-item--new {
+  border-color: #097969;
+  background: #f0faf8;
+}
+
 .loading,
 .error,
 .no-results {

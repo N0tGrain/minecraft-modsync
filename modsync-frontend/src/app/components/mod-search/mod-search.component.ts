@@ -5,12 +5,6 @@ import { RouterModule } from '@angular/router';
 import { Mod } from '../../models/mod.model';
 import { ModsApiService } from '../../services/mods-api-service';
 
-/**
- * Component for displaying and searching mods.
- * Implements SOLID principles:
- * - Single Responsibility: handles mod listing and search UI only
- * - Dependency Injection: relies on ModsApiService for data
- */
 @Component({
   selector: 'app-mod-search',
   standalone: true,
@@ -19,77 +13,102 @@ import { ModsApiService } from '../../services/mods-api-service';
   styleUrl: './mod-search.component.scss',
 })
 export class ModSearchComponent implements OnInit {
-  // Reactive state using Angular signals
   protected readonly mods = signal<Mod[]>([]);
   protected readonly filteredMods = signal<Mod[]>([]);
+  protected readonly importedMods = signal<Mod[]>([]);
+  protected readonly displayMods = signal<Mod[]>([]);
   protected readonly searchQuery = signal<string>('');
   protected readonly isLoading = signal<boolean>(false);
+  protected readonly isImporting = signal<boolean>(false);
   protected readonly errorMessage = signal<string>('');
+  protected readonly importMessage = signal<string>('');
 
-  public constructor(private readonly modsApiService: ModsApiService) {}
+  constructor(private readonly modsApiService: ModsApiService) {}
 
-  /**
-   * Lifecycle hook: initializes component by loading mods
-   */
-  public ngOnInit(): void {
+  ngOnInit(): void {
     this.loadMods();
   }
 
-  /**
-   * Loads all mods from the backend.
-   * @private
-   */
-  protected loadMods(): void {
-    this.isLoading.set(true);
-    this.errorMessage.set('');
-
-    this.modsApiService.fetchAllMods().subscribe({
-      next: (data: Mod[]): void => {
-
-        const sortedMods: Mod[] = [...data].sort((a, b) => b.downloads - a.downloads);
-
-        this.mods.set(sortedMods);
-        this.filteredMods.set(data);
-        this.isLoading.set(false);
-      },
-      error: (error: any): void => {
-        console.error('Error loading mods:', error);
-        this.errorMessage.set('Failed to load mods. Please try again.');
-        this.isLoading.set(false);
-      },
-    });
-    // this.modsApiService.importVersionsForAllMods();
-  }
-
-  /**
-   * Handles search input changes and filters the mod list.
-   * @param query - The search query string
-   */
-  public onSearchChange(query: string): void {
+  onSearchChange(query: string): void {
     this.searchQuery.set(query);
     this.filterMods(query);
   }
 
-  /**
-   * Filters mods based on the search query.
-   * @param query - The search query string
-   * @private
-   */
+  importMods(): void {
+    const query = this.searchQuery().trim();
+    if (!query) {
+      return;
+    }
+
+    this.isImporting.set(true);
+    this.importMessage.set('');
+    this.errorMessage.set('');
+
+    this.modsApiService.fetchAllModsAndImport(query).subscribe({
+      next: (imported: Mod[]) => {
+        this.importedMods.set(imported);
+        if (imported.length === 0) {
+          this.importMessage.set('No new mods found on Modrinth for this search.');
+        } else {
+          this.importMessage.set(`Imported ${imported.length} new mod(s) from Modrinth.`);
+        }
+        this.loadMods();
+        this.isImporting.set(false);
+      },
+      error: () => {
+        this.errorMessage.set('Failed to import mods from Modrinth.');
+        this.isImporting.set(false);
+      },
+    });
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.importedMods.set([]);
+    this.importMessage.set('');
+    this.filteredMods.set(this.mods());
+    this.updateDisplayMods();
+  }
+
+  private loadMods(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    this.modsApiService.fetchAllMods().subscribe({
+      next: (data: Mod[]) => {
+        const sortedMods = [...data].sort((a, b) => b.downloads - a.downloads);
+        this.mods.set(sortedMods);
+        this.filterMods(this.searchQuery());
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.errorMessage.set('Failed to load mods. Please try again.');
+        this.isLoading.set(false);
+      },
+    });
+  }
+
   private filterMods(query: string): void {
-    const lowerQuery: string = query.toLowerCase();
-    const filtered: Mod[] = this.mods().filter(
-      (mod: Mod): boolean =>
+    if (!query.trim()) {
+      this.filteredMods.set(this.mods());
+      this.updateDisplayMods();
+      return;
+    }
+
+    const lowerQuery = query.toLowerCase();
+    const filtered = this.mods().filter(
+      (mod) =>
         mod.name.toLowerCase().includes(lowerQuery) ||
         mod.description.toLowerCase().includes(lowerQuery)
     );
     this.filteredMods.set(filtered);
+    this.updateDisplayMods();
   }
 
-  /**
-   * Clears the search query and resets the mod list.
-   */
-  public clearSearch(): void {
-    this.searchQuery.set('');
-    this.filteredMods.set(this.mods());
+  private updateDisplayMods(): void {
+    const importedIds = new Set(this.importedMods().map((m) => m.externalId));
+    this.displayMods.set(
+      this.filteredMods().filter((mod) => !importedIds.has(mod.externalId))
+    );
   }
 }

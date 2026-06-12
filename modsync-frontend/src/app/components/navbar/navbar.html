@@ -1,5 +1,5 @@
 <header class="header">
-  <a class="header__logo">Modsync</a>
+  <a class="header__logo" routerLink="/mods">Modsync</a>
 
   <button class="header__toggle" (click)="toggleMenu()" aria-label="Toggle navigation">
     @if (!isMenuOpen) {
@@ -14,11 +14,18 @@
   </button>
 
   <nav class="header__nav" [class.header__nav--open]="isMenuOpen">
-    <a href="#" (click)="closeMenu()">Mods</a>
-    <a href="#" (click)="closeMenu()">Modpacks</a>
-    <a href="#" (click)="closeMenu()">Library</a>
-    <a href="#" (click)="closeMenu()">Profile</a>
+    <a routerLink="/mods" (click)="closeMenu()">Mods</a>
+    @if (authService.isLoggedIn()) {
+      <a routerLink="/favorites" (click)="closeMenu()">Favorites</a>
+      <a routerLink="/profile" (click)="closeMenu()">Profile</a>
+    }
 
-    <ng-content/>
+    <div class="header__auth">
+      @if (authService.isLoggedIn()) {
+        <button type="button" class="header__logout" (click)="logout()">Logout</button>
+      } @else {
+        <a routerLink="/login" (click)="closeMenu()" class="header__login">Login</a>
+      }
+    </div>
   </nav>
 </header>
