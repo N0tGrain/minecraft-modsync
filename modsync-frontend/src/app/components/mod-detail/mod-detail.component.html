@@ -36,16 +36,34 @@
           <div class="downloads-badge">
             {{ modData.downloads | number }} downloads
           </div>
-          @if (isLoggedIn()) {
-            <button
-              type="button"
-              class="favorite-button"
-              [disabled]="favoriteLoading()"
-              (click)="toggleFavorite()"
-            >
-              {{ isFavorite() ? '★ Remove from Favorites' : '☆ Add to Favorites' }}
-            </button>
-          }
+          <section class="versions-section">
+            <h2>Versions</h2>
+
+            <div class="version-filter">
+              <label>Minecraft Version:</label>
+
+              <select
+                [value]="selectedMinecraftVersion()"
+                (change)="onSelectedVersionChange($any($event.target).value)"
+              >
+                <option value="all">All</option>
+
+                @for (version of getAvailableMinecraftVersions(); track version) {
+                  <option [value]="version">
+                    {{ version }}
+                  </option>
+                }
+              </select>
+            </div>
+          </section>
+          <button
+            type="button"
+            class="favorite-button"
+            [disabled]="favoriteLoading()"
+            (click)="toggleFavorite()"
+          >
+            {{ isFavorite() ? '★ Remove from Favorites' : '☆ Add to Favorites' }}
+          </button>
         </div>
       </div>
 
@@ -76,15 +94,22 @@
           </div>
         </section>
 
-        @if (modData.versions && modData.versions.length > 0) {
+        @if (getFilteredVersions().length > 0) {
           <section class="versions-section">
-            <h2>Versions ({{ modData.versions.length }})</h2>
+            <h2>Versions ({{ getFilteredVersions().length }})</h2>
+
             <div class="versions-list">
-              @for (version of modData.versions; track version) {
+              @for (version of getFilteredVersions(); track version.externalVersionId) {
                 <div class="version-item">
-                  <span><strong>{{ version.minecraftVersion }}</strong> ({{version.version}})</span>
-                  <p>{{version.loader}}</p>
-                  <p>Release date: {{version.releaseDate | date: 'dd-MM-yyyy'}}</p>
+                  <span>
+                    <strong>{{ version.minecraftVersion }}</strong>
+                    ({{ version.version }})
+                  </span>
+                  <p>{{ version.loader }}</p>
+                  <p>
+                    Release date:
+                    {{ version.releaseDate | date: 'dd-MM-yyyy' }}
+                  </p>
                 </div>
               }
             </div>

@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Mod } from '../../models/mod.model';
+import { Mod, ModVersion } from '../../models/mod.model';
 import { ModsApiService } from '../../services/mods-api-service';
 import { FavoritesApiService } from '../../services/favorites-api.service';
 import { AuthService } from '../../services/auth.service';
@@ -19,6 +19,7 @@ export class ModDetailComponent implements OnInit {
   protected readonly errorMessage = signal<string>('');
   protected readonly isFavorite = signal<boolean>(false);
   protected readonly favoriteLoading = signal<boolean>(false);
+  protected readonly selectedMinecraftVersion = signal<string>('');
 
   constructor(
     private readonly modsApiService: ModsApiService,
@@ -73,11 +74,17 @@ export class ModDetailComponent implements OnInit {
     this.errorMessage.set('');
 
     this.modsApiService.fetchModByExternalId(externalId).subscribe({
-      next: (data: Mod) => {
+      next: (data: Mod): void => {
         this.mod.set(data);
+
+        const versions: string[] = data.versions!.map(v => this.extractMajorVersion(v.minecraftVersion!));
+        const uniqueVersions: string[] = [...new Set(versions)].sort((a: string, b: string): number => this.compareVersions(b, a));
+        if (uniqueVersions.length > 0) {
+          this.selectedMinecraftVersion.set(uniqueVersions[0]);
+        }
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (): void => {
         this.errorMessage.set('Failed to load mod details. Please try again.');
         this.isLoading.set(false);
       },
@@ -88,5 +95,54 @@ export class ModDetailComponent implements OnInit {
     this.favoritesApiService.isFavorite(externalId).subscribe({
       next: (result) => this.isFavorite.set(result.favorite),
     });
+  }
+
+  protected onSelectedVersionChange(version: string): void {
+    this.selectedMinecraftVersion.set(version);
+  }
+
+  protected getAvailableMinecraftVersions(): string[] {
+    const modData = this.mod();
+    if (!modData?.versions) {
+      return [];
+    }
+
+    const versions = modData.versions.map(v => this.extractMajorVersion(v.minecraftVersion!));
+    return [...new Set(versions)].sort((a,b) => this.compareVersions(b, a));
+  }
+
+  private extractMajorVersion(version: string): string {
+    const parts: string[] = version.split('.');
+    return parts.length >= 2 ? `${parts[0]}.${parts[1]}` : version;
+  }
+
+  protected getFilteredVersions(): ModVersion[] {
+    const modData: Mod | null = this.mod();
+
+    if (!modData?.versions) return [];
+
+    const selected: string = this.selectedMinecraftVersion();
+
+    if (!selected || selected === 'all') {
+      return modData.versions;
+    }
+
+    return modData.versions.filter(version => version.minecraftVersion!.startsWith(selected));
+  }
+
+  private compareVersions(a: string, b: string): number {
+    const aParts: number[] = a.split('.').map(Number);
+    const bParts: number[] = b.split('.').map(Number);
+
+    const max: number = Math.max(aParts.length, bParts.length);
+
+    for (let i: number = 0; i < max; i++) {
+      const aVal: number = aParts[i] || 0;
+      const bVal: number = bParts[i] || 0;
+      if (aVal !== bVal) {
+        return aVal - bVal;
+      }
+    }
+    return 0;
   }
 }

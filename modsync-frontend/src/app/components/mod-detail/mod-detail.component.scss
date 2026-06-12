@@ -198,7 +198,17 @@ section h2 {
   word-break: break-all;
 }
 
-.versions-section {
+.version-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.version-filter select {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .versions-list {
