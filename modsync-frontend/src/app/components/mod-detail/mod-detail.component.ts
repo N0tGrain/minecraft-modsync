@@ -19,7 +19,7 @@ export class ModDetailComponent implements OnInit {
   protected readonly errorMessage = signal<string>('');
   protected readonly isFavorite = signal<boolean>(false);
   protected readonly favoriteLoading = signal<boolean>(false);
-  protected readonly selectedMinecraftVersion = signal<string>('');
+  protected readonly selectedMinecraftVersion = signal<string>('all');
 
   constructor(
     private readonly modsApiService: ModsApiService,
@@ -80,7 +80,7 @@ export class ModDetailComponent implements OnInit {
         const versions: string[] = data.versions!.map(v => this.extractMajorVersion(v.minecraftVersion!));
         const uniqueVersions: string[] = [...new Set(versions)].sort((a: string, b: string): number => this.compareVersions(b, a));
         if (uniqueVersions.length > 0) {
-          this.selectedMinecraftVersion.set(uniqueVersions[0]);
+          this.selectedMinecraftVersion.set('all');
         }
         this.isLoading.set(false);
       },

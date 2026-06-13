@@ -46,13 +46,14 @@
                 [value]="selectedMinecraftVersion()"
                 (change)="onSelectedVersionChange($any($event.target).value)"
               >
-                <option value="all">All</option>
 
+                <option value="all">All</option>
                 @for (version of getAvailableMinecraftVersions(); track version) {
                   <option [value]="version">
                     {{ version }}
                   </option>
                 }
+
               </select>
             </div>
           </section>
