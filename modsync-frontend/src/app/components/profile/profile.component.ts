@@ -62,7 +62,10 @@ export class ProfileComponent implements OnInit {
 
   removeFriend(friendId: number): void {
     this.friendsApiService.removeFriend(friendId).subscribe({
-      next: () => this.loadFriends(),
+      next: () => {
+        this.loadFriends();
+        this.successMessage.set('Friend succesfully removed!');
+      },
       error: () => this.errorMessage.set('Could not remove friend.'),
     });
   }
