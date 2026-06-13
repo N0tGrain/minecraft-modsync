@@ -7,6 +7,7 @@ import com.n0tgrain.modsyncbackend.models.Mod;
 import com.n0tgrain.modsyncbackend.models.UserFavoriteMod;
 import com.n0tgrain.modsyncbackend.repositories.ModRepository;
 import com.n0tgrain.modsyncbackend.repositories.UserFavoriteModRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,7 @@ public class FavoriteService {
         userFavoriteModRepository.save(new UserFavoriteMod(currentUser, mod));
     }
 
+    @Transactional
     public void removeFavorite(String externalId) {
         CustomUser currentUser = getAuthenticatedUser();
         Mod mod = modRepository.findByExternalId(externalId)
