@@ -17,7 +17,12 @@
     <a routerLink="/mods" (click)="closeMenu()">Mods</a>
     @if (authService.isLoggedIn()) {
       <a routerLink="/favorites" (click)="closeMenu()">Favorites</a>
-      <a routerLink="/profile" (click)="closeMenu()">Profile</a>
+      <a routerLink="/profile" (click)="closeMenu()" class="header__profile-link">
+        Profile
+        @if (friendService.pendingRequestCount() > 0) {
+          <span class="header__badge">{{ friendService.pendingRequestCount() }}</span>
+        }
+      </a>
     }
 
     <div class="header__auth">

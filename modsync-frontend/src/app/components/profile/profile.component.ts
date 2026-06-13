@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FriendsApiService } from '../../services/friends-api.service';
-import { Friend, User } from '../../models/user.model';
+import { Friend, FriendRequest, User } from '../../models/user.model';
 
 @Component({
   selector: 'app-profile',
@@ -16,6 +16,7 @@ import { Friend, User } from '../../models/user.model';
 export class ProfileComponent implements OnInit {
   protected readonly user = signal<User | null>(null);
   protected readonly friends = signal<Friend[]>([]);
+  protected readonly friendRequests = signal<FriendRequest[]>([]);
   protected readonly searchResults = signal<User[]>([]);
   protected readonly searchQuery = signal('');
   protected readonly isLoading = signal(false);
@@ -24,12 +25,13 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly friendsApiService: FriendsApiService
+    protected readonly friendsApiService: FriendsApiService
   ) {}
 
   ngOnInit(): void {
     this.loadProfile();
     this.loadFriends();
+    this.loadFriendRequests();
   }
 
   onSearchChange(query: string): void {
@@ -45,18 +47,48 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  addFriend(friendId: number): void {
+  sendFriendRequest(friendId: number): void {
     this.errorMessage.set('');
     this.successMessage.set('');
 
-    this.friendsApiService.addFriend(friendId).subscribe({
+    this.friendsApiService.sendFriendRequest(friendId).subscribe({
       next: () => {
-        this.successMessage.set('Friend added!');
-        this.loadFriends();
+        this.successMessage.set('Friend request sent!');
         this.searchResults.set([]);
         this.searchQuery.set('');
+        // If the other user had already sent us a request, the backend
+        // accepts it automatically and we become friends right away.
+        this.loadFriends();
+        this.loadFriendRequests();
       },
-      error: () => this.errorMessage.set('Could not add friend. They may already be a friend.'),
+      error: () =>
+        this.errorMessage.set(
+          'Could not send friend request. You may already be friends or have a pending request.'
+        ),
+    });
+  }
+
+  acceptFriendRequest(requestId: number): void {
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.friendsApiService.acceptFriendRequest(requestId).subscribe({
+      next: () => {
+        this.successMessage.set('Friend request accepted!');
+        this.loadFriends();
+        this.loadFriendRequests();
+      },
+      error: () => this.errorMessage.set('Could not accept friend request.'),
+    });
+  }
+
+  declineFriendRequest(requestId: number): void {
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.friendsApiService.declineFriendRequest(requestId).subscribe({
+      next: () => this.loadFriendRequests(),
+      error: () => this.errorMessage.set('Could not decline friend request.'),
     });
   }
 
@@ -88,6 +120,16 @@ export class ProfileComponent implements OnInit {
     this.friendsApiService.getFriends().subscribe({
       next: (friends) => this.friends.set(friends),
       error: () => this.errorMessage.set('Failed to load friends.'),
+    });
+  }
+
+  private loadFriendRequests(): void {
+    this.friendsApiService.getFriendRequests().subscribe({
+      next: (requests) => {
+        this.friendRequests.set(requests);
+        this.friendsApiService.pendingRequestCount.set(requests.length);
+      },
+      error: () => this.errorMessage.set('Failed to load friend requests.'),
     });
   }
 }

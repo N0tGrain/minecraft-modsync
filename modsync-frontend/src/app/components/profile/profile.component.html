@@ -21,6 +21,27 @@
     </section>
   }
 
+  @if (friendRequests().length > 0) {
+    <section class="friend-requests-section">
+      <h2>
+        Friend Requests
+        <span class="badge">{{ friendRequests().length }}</span>
+      </h2>
+
+      <ul class="friend-requests-list">
+        @for (request of friendRequests(); track request.id) {
+          <li>
+            <span>{{ request.senderUsername }}</span>
+            <div class="friend-requests-actions">
+              <button type="button" (click)="acceptFriendRequest(request.id)">Accept</button>
+              <button type="button" class="decline" (click)="declineFriendRequest(request.id)">Decline</button>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
   <section class="friends-section">
     <h2>Friends</h2>
 
@@ -52,7 +73,7 @@
         @for (result of searchResults(); track result.id) {
           <li>
             <span>{{ result.username }}</span>
-            <button type="button" (click)="addFriend(result.id)">Add</button>
+            <button type="button" (click)="sendFriendRequest(result.id)">Add</button>
           </li>
         }
       </ul>

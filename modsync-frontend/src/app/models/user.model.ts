@@ -27,3 +27,14 @@ export interface Friend {
   username: string;
   email: string;
 }
+
+export interface FriendRequest {
+  id: number;
+  senderId: number;
+  senderUsername: string;
+  createdAt: string;
+}
+
+export interface FriendRequestCount {
+  count: number;
+}
