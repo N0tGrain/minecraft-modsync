@@ -1,0 +1,94 @@
+<div class="modpack-detail-container">
+  <div class="back-navigation">
+    <a routerLink="/modpacks">← Back to My Modpacks</a>
+  </div>
+
+  @if (isLoading()) {
+    <p>Loading modpack...</p>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (successMessage()) {
+    <div class="success">{{ successMessage() }}</div>
+  }
+
+  @if (modpack(); as modpackData) {
+    <section class="modpack-info">
+      <h1>{{ modpackData.name }}</h1>
+      @if (modpackData.description) {
+        <p>{{ modpackData.description }}</p>
+      }
+      <p class="meta">
+        <strong>Minecraft:</strong> {{ modpackData.minecraftVersion }}
+        &nbsp;·&nbsp;<strong>Loader:</strong> {{ modpackData.loader }}
+        &nbsp;·&nbsp;<strong>Visibility:</strong> {{ modpackData.visibility }}
+      </p>
+      <p class="meta"><strong>Owner:</strong> {{ modpackData.ownerUsername }}</p>
+    </section>
+
+    @if (modpackData.mods && modpackData.mods.length > 0) {
+      <section class="modpack-mods">
+        <h2>Mods in this modpack</h2>
+        <ul>
+          @for (entry of modpackData.mods; track entry.modVersionId) {
+            <li>
+              {{ entry.modName }} ({{ entry.version }})
+              @if (entry.required) {
+                <span class="badge">Required</span>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (isOwner()) {
+      <section class="add-mods-section">
+        <h2>Add Mods</h2>
+        <p class="hint">
+          Only mod versions matching {{ modpackData.minecraftVersion }} ({{ modpackData.loader }}) are shown below.
+        </p>
+
+        @if (!isLoading() && availableMods().length === 0) {
+          <p class="empty">
+            No compatible mods found yet. Import mods for {{ modpackData.minecraftVersion }} ({{ modpackData.loader }})
+            from the Mods page first.
+          </p>
+        }
+
+        <ul class="available-mods-list">
+          @for (mod of availableMods(); track mod.id) {
+            <li class="available-mod">
+              <div class="mod-icon">
+                @if (mod.iconUrl) {
+                  <img [src]="mod.iconUrl" [alt]="mod.name" loading="lazy" />
+                } @else {
+                  <div class="no-icon">No Icon</div>
+                }
+              </div>
+
+              <div class="mod-info">
+                <strong>{{ mod.name }}</strong>
+                <select (change)="onVersionSelect(mod.id, $any($event.target).value)">
+                  <option value="" disabled selected>Select version...</option>
+                  @for (version of mod.compatibleVersions; track version.id) {
+                    <option [value]="version.id" [disabled]="isAlreadyAdded(version.id)">
+                      {{ version.version }}{{ isAlreadyAdded(version.id) ? ' (already added)' : '' }}
+                    </option>
+                  }
+                </select>
+              </div>
+
+              <button type="button" [disabled]="addingModId() === mod.id" (click)="addModToModpack(mod.id)">
+                {{ addingModId() === mod.id ? 'Adding...' : 'Add' }}
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+</div>

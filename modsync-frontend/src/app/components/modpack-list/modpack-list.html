@@ -1,0 +1,99 @@
+<div class="modpack-list-container">
+  <div class="header">
+    <h1>My Modpacks</h1>
+    <button type="button" (click)="toggleCreateForm()">
+      {{ showCreateForm() ? 'Cancel' : 'Create Modpack' }}
+    </button>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (showCreateForm()) {
+    <form class="create-form" (ngSubmit)="createModpack()">
+      <label>
+        Name
+        <input type="text" name="name" [(ngModel)]="newModpack.name" required />
+      </label>
+
+      <label>
+        Description
+        <textarea name="description" [(ngModel)]="newModpack.description"></textarea>
+      </label>
+
+      <label>
+        Minecraft Version
+        <input
+          type="text"
+          name="minecraftVersion"
+          placeholder="e.g. 1.20.1"
+          list="mc-version-options"
+          [(ngModel)]="newModpack.minecraftVersion"
+          required
+        />
+        <datalist id="mc-version-options">
+          @for (version of availableMinecraftVersions(); track version) {
+            <option [value]="version"></option>
+          }
+        </datalist>
+      </label>
+
+      <label>
+        Loader
+        <input
+          type="text"
+          name="loader"
+          placeholder="e.g. fabric"
+          list="loader-options"
+          [(ngModel)]="newModpack.loader"
+          required
+        />
+        <datalist id="loader-options">
+          @for (loader of availableLoaders(); track loader) {
+            <option [value]="loader"></option>
+          }
+        </datalist>
+      </label>
+
+      <label>
+        Visibility
+        <select name="visibility" [(ngModel)]="newModpack.visibility">
+          <option [value]="Visibility.PRIVATE">Private</option>
+          <option [value]="Visibility.FRIENDS_ONLY">Friends Only</option>
+          <option [value]="Visibility.PUBLIC">Public</option>
+        </select>
+      </label>
+
+      <p class="hint">
+        Only mods with a version matching this Minecraft version and loader can be added to this modpack.
+      </p>
+
+      <button type="submit" [disabled]="isCreating()">
+        {{ isCreating() ? 'Creating...' : 'Create' }}
+      </button>
+    </form>
+  }
+
+  @if (isLoading()) {
+    <p>Loading modpacks...</p>
+  }
+
+  @if (!isLoading() && modpacks().length === 0) {
+    <p class="empty">You haven't created any modpacks yet.</p>
+  }
+
+  <ul class="modpacks-list">
+    @for (modpack of modpacks(); track modpack.id) {
+      <li>
+        <a [routerLink]="['/modpacks', modpack.id]">
+          <h2>{{ modpack.name }}</h2>
+          @if (modpack.description) {
+            <p>{{ modpack.description }}</p>
+          }
+          <p class="meta">{{ modpack.minecraftVersion }} · {{ modpack.loader }} · {{ modpack.visibility }}</p>
+        </a>
+      </li>
+    }
+  </ul>
+</div>

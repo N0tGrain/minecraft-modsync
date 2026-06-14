@@ -6,6 +6,8 @@ import { RegisterComponent } from './components/register/register.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { FavoritesComponent } from './components/favorites/favorites.component';
 import { authGuard } from './guards/auth.guard';
+import { ModpackDetailComponent } from './components/modpack-detail/modpack-detail.component';
+import { ModpackList } from './components/modpack-list/modpack-list';
 
 export const routes: Routes = [
   {
@@ -34,6 +36,16 @@ export const routes: Routes = [
   {
     path: 'favorites',
     component: FavoritesComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'modpacks',
+    component: ModpackList,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'modpacks/:id',
+    component: ModpackDetailComponent,
     canActivate: [authGuard],
   },
   {

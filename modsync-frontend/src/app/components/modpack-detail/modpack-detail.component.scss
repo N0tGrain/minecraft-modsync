@@ -1,0 +1,102 @@
+.modpack-detail-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+
+  .back-navigation {
+    margin-bottom: 1rem;
+
+    a {
+      text-decoration: none;
+    }
+  }
+
+  .modpack-info {
+    margin-bottom: 1.5rem;
+
+    .meta {
+      color: #666;
+      margin: 0.25rem 0;
+    }
+  }
+
+  .modpack-mods ul {
+    list-style: none;
+    padding: 0;
+
+    li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+    }
+  }
+
+  .badge {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+  }
+
+  .add-mods-section {
+    margin-top: 2rem;
+
+    .hint {
+      color: #666;
+      font-size: 0.9rem;
+    }
+  }
+
+  .available-mods-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .available-mod {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.75rem;
+
+      .mod-icon img,
+      .mod-icon .no-icon {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+
+      .mod-icon .no-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #eee;
+        font-size: 0.7rem;
+        text-align: center;
+      }
+
+      .mod-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+    }
+  }
+
+  .error {
+    color: #b00020;
+  }
+
+  .success {
+    color: #2e7d32;
+  }
+
+  .empty {
+    color: #666;
+  }
+}
