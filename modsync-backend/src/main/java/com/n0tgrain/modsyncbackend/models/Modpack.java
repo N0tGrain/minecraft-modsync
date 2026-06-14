@@ -1,5 +1,6 @@
 package com.n0tgrain.modsyncbackend.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,6 +32,7 @@ public class Modpack {
     @JoinColumn(name = "owner_id")
     private CustomUser owner;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "modpack", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ModpackMod> mods = new ArrayList<>();
 

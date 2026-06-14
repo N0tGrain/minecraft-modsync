@@ -1,5 +1,6 @@
 package com.n0tgrain.modsyncbackend.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,7 @@ public class ModpackMod {
     @EmbeddedId
     private ModpackModId id = new ModpackModId();
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("modpackId")
     @JoinColumn(name = "modpack_id")
