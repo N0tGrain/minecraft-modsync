@@ -1,0 +1,40 @@
+<div class="friend-profile-container">
+  <div class="back-navigation">
+    <a routerLink="/profile">← Back to Profile</a>
+  </div>
+
+  <h1>{{ username() || 'Profile' }}</h1>
+
+  @if (isLoading()) {
+    <p>Loading modpacks...</p>
+  }
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (!isLoading() && !errorMessage()) {
+    <section class="modpacks-section">
+      <h2>Modpacks</h2>
+
+      @if (modpacks().length === 0) {
+        <p class="empty">This user has no public or shared modpacks.</p>
+      }
+
+      <ul class="modpacks-list">
+        @for (modpack of modpacks(); track modpack.id) {
+          <li>
+            <h3>{{ modpack.name }}</h3>
+            @if (modpack.description) {
+              <p>{{ modpack.description }}</p>
+            }
+            <p class="meta">
+              {{ modpack.minecraftVersion }} · {{ modpack.loader }} ·
+              <span class="visibility-badge">{{ modpack.visibility }}</span>
+            </p>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>
