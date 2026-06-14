@@ -29,9 +29,19 @@
       <p class="meta"><strong>Owner:</strong> {{ modpackData.ownerUsername }}</p>
     </section>
 
-    @if (modpackData.mods && modpackData.mods.length > 0) {
-      <section class="modpack-mods">
+    <section class="modpack-mods">
+      <div class="section-header">
         <h2>Mods in this modpack</h2>
+        @if (isOwner()) {
+          <button type="button" (click)="toggleAddMods()">
+            {{ showAddMods() ? 'Add Mods ▲' : 'Add Mods ▼' }}
+          </button>
+        }
+      </div>
+
+      @if (!modpackData.mods || modpackData.mods.length === 0) {
+        <p class="empty">No mods added yet.</p>
+      } @else {
         <ul>
           @for (entry of modpackData.mods; track entry.modVersionId) {
             <li>
@@ -42,14 +52,14 @@
             </li>
           }
         </ul>
-      </section>
-    }
+      }
+    </section>
 
-    @if (isOwner()) {
+    @if (isOwner() && showAddMods()) {
       <section class="add-mods-section">
         <h2>Add Mods</h2>
         <p class="hint">
-          Only mod versions matching {{ modpackData.minecraftVersion }} ({{ modpackData.loader }}) are shown below.
+          Only mods with a version matching {{ modpackData.minecraftVersion }} ({{ modpackData.loader }}) are shown below.
         </p>
 
         @if (!isLoading() && availableMods().length === 0) {
@@ -72,19 +82,16 @@
 
               <div class="mod-info">
                 <strong>{{ mod.name }}</strong>
-                <select (change)="onVersionSelect(mod.id, $any($event.target).value)">
-                  <option value="" disabled selected>Select version...</option>
-                  @for (version of mod.compatibleVersions; track version.id) {
-                    <option [value]="version.id" [disabled]="isAlreadyAdded(version.id)">
-                      {{ version.version }}{{ isAlreadyAdded(version.id) ? ' (already added)' : '' }}
-                    </option>
-                  }
-                </select>
+                <span class="version-label">{{ mod.compatibleVersion?.version }}</span>
               </div>
 
-              <button type="button" [disabled]="addingModId() === mod.id" (click)="addModToModpack(mod.id)">
-                {{ addingModId() === mod.id ? 'Adding...' : 'Add' }}
-              </button>
+              @if (isAlreadyAdded(mod.compatibleVersion!.id)) {
+                <span class="badge">Already added</span>
+              } @else {
+                <button type="button" [disabled]="addingModId() === mod.id" (click)="addModToModpack(mod)">
+                  {{ addingModId() === mod.id ? 'Adding...' : 'Add' }}
+                </button>
+              }
             </li>
           }
         </ul>

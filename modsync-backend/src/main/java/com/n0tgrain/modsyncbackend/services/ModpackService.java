@@ -4,12 +4,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.n0tgrain.modsyncbackend.dtos.AddModToModpackRequest;
+import com.n0tgrain.modsyncbackend.dtos.ModpackModEntryDTO;
 import com.n0tgrain.modsyncbackend.dtos.ModpackRequest;
 import com.n0tgrain.modsyncbackend.dtos.ModpackResponseDTO;
 import com.n0tgrain.modsyncbackend.exceptions.CustomModException;
 import com.n0tgrain.modsyncbackend.exceptions.CustomModpackException;
 import com.n0tgrain.modsyncbackend.exceptions.CustomUserException;
 import com.n0tgrain.modsyncbackend.models.CustomUser;
+import com.n0tgrain.modsyncbackend.models.Mod;
 import com.n0tgrain.modsyncbackend.models.ModVersion;
 import com.n0tgrain.modsyncbackend.models.Modpack;
 import com.n0tgrain.modsyncbackend.models.ModpackMod;
@@ -73,8 +75,28 @@ public class ModpackService {
         response.loader = modpack.getLoader();
         response.visibility = modpack.getVisibility();
         response.ownerUsername = modpack.getOwner().getUsername();
+        response.mods = modpack.getMods().stream()
+                .map(this::mapToModEntry)
+                .toList();
 
         return response;
+    }
+
+    private ModpackModEntryDTO mapToModEntry(ModpackMod modpackMod) {
+        ModVersion modVersion = modpackMod.getModVersion();
+        Mod mod = modVersion.getMod();
+
+        ModpackModEntryDTO dto = new ModpackModEntryDTO();
+        dto.modVersionId = modVersion.getId();
+        dto.modId = mod.getId();
+        dto.modName = mod.getName();
+        dto.modExternalId = mod.getExternalId();
+        dto.iconUrl = mod.getIconUrl();
+        dto.version = modVersion.getVersion();
+        dto.minecraftVersion = modVersion.getMinecraftVersion();
+        dto.loader = modVersion.getLoader();
+        dto.required = modpackMod.isRequired();
+        return dto;
     }
 
     public Modpack addModToModpack(Long modpackId, AddModToModpackRequest request) {
@@ -95,13 +117,10 @@ public class ModpackService {
         }
 
         ModpackMod modpackMod = new ModpackMod();
-
         modpackMod.setId(new ModpackModId(modpack.getId(), modVersion.getId()));
-
         modpackMod.setModpack(modpack);
         modpackMod.setModVersion(modVersion);
         modpackMod.setRequired(request.required);
-
         modpack.getMods().add(modpackMod);
         modpackRepository.save(modpack);
 
@@ -120,7 +139,7 @@ public class ModpackService {
         Modpack modpack = modpackRepository.findById(modpackId)
                 .orElseThrow(() -> new CustomModpackException("Modpack not found"));
         CustomUser currentUser = getAuthenticatedUser();
-        
+
         if (!canAccessModpack(modpack, currentUser)) {
             throw new CustomModpackException("Modpack is not accessible");
         }
@@ -189,17 +208,14 @@ public class ModpackService {
         if (modpack.getOwner().getId().equals(currentUser.getId())) {
             return true;
         }
-
         // PUBLIC modpacks are accessible to anyone
         if (modpack.getVisibility() == Visibility.PUBLIC) {
             return true;
         }
-
         // FRIENDS_ONLY modpacks are accessible only to friends
         if (modpack.getVisibility() == Visibility.FRIENDS_ONLY) {
             return friendService.areFriendsWith(modpack.getOwner().getId(), currentUser.getId());
         }
-
         // PRIVATE modpacks are not accessible
         return false;
     }
@@ -215,17 +231,14 @@ public class ModpackService {
                     if (modpack.getOwner().getId().equals(currentUser.getId())) {
                         return true;
                     }
-
                     // If modpack is PUBLIC, everyone can see it
                     if (modpack.getVisibility() == Visibility.PUBLIC) {
                         return true;
                     }
-
                     // If modpack is FRIENDS_ONLY, only friends can see it
                     if (modpack.getVisibility() == Visibility.FRIENDS_ONLY) {
                         return friendService.areFriendsWith(userId, currentUser.getId());
                     }
-
                     // PRIVATE modpacks are not visible
                     return false;
                 })
