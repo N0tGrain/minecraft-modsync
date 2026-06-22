@@ -1,4 +1,9 @@
 <div class="modpack-list-container">
+
+  <div class="back-navigation">
+    <a routerLink="/profile">← Back to Profile</a>
+  </div>
+
   <div class="header">
     <h1>My Modpacks</h1>
     <button type="button" (click)="toggleCreateForm()">
@@ -51,6 +56,7 @@
         />
         <datalist id="loader-options">
           @for (loader of availableLoaders(); track loader) {
+<!--            TODO: FIX SORT BUG: 1.21.11 < 1.21.2-->
             <option [value]="loader"></option>
           }
         </datalist>
