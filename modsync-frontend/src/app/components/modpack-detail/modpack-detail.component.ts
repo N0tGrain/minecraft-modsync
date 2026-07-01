@@ -1,9 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ModpacksApiService } from '../../services/modpacks-api-service';
 import { ModsApiService } from '../../services/mods-api-service';
 import { AuthService } from '../../services/auth.service';
-import { Modpack } from '../../models/modpack.model';
+import { Modpack, ModpackModEntry } from '../../models/modpack.model';
 import { Mod, ModVersion } from '../../models/mod.model';
 
 interface ModWithCompatibleVersion extends Mod {
@@ -24,6 +24,8 @@ export class ModpackDetailComponent implements OnInit {
   protected readonly successMessage = signal('');
   protected readonly isOwner = signal(false);
   protected readonly addingModId = signal<number | null>(null);
+  protected readonly removingModId = signal<number | null>(null);
+  protected readonly deletingModpack = signal(false);
   protected readonly showAddMods = signal(false);
 
   constructor(
@@ -31,6 +33,7 @@ export class ModpackDetailComponent implements OnInit {
     private readonly modsApiService: ModsApiService,
     private readonly authService: AuthService,
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -71,6 +74,52 @@ export class ModpackDetailComponent implements OnInit {
       error: (error: any): void => {
         this.errorMessage.set(error?.error?.message ?? 'Could not add mod to modpack.');
         this.addingModId.set(null);
+      },
+    });
+  }
+
+  protected removeModFromModpack(entry: ModpackModEntry): void {
+    const modpack = this.modpack();
+
+    if (!modpack) {
+      return;
+    }
+
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.removingModId.set(entry.modVersionId);
+
+    this.modpacksApiService.removeModFromModpack(modpack.id, entry.modVersionId).subscribe({
+      next: () => {
+        this.successMessage.set(`${entry.modName} removed from modpack.`);
+        this.removingModId.set(null);
+        this.loadModpack(modpack.id);
+      },
+      error: (error: any): void => {
+        this.errorMessage.set(error?.error?.message ?? 'Could not remove mod from modpack.');
+        this.removingModId.set(null);
+      },
+    });
+  }
+
+  protected deleteModpack(): void {
+    const modpack = this.modpack();
+
+    if (!modpack) {
+      return;
+    }
+
+    this.deletingModpack.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.modpacksApiService.deleteModpack(modpack.id).subscribe({
+      next: () => {
+        this.router.navigate(['/modpacks']);
+      },
+      error: () => {
+        this.errorMessage.set('Failed to delete modpack.');
+        this.deletingModpack.set(false);
       },
     });
   }

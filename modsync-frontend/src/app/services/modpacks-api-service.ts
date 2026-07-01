@@ -43,4 +43,8 @@ export class ModpacksApiService {
     return this.http.post<Modpack>(`${this.apiBaseUrl}/${modpackId}/mods`, request);
   }
 
+  public removeModFromModpack(modpackId: number, modVersionId: number): Observable<Modpack> {
+    return this.http.delete<Modpack>(`${this.apiBaseUrl}/${modpackId}/mods/${modVersionId}`);
+  }
+
 }

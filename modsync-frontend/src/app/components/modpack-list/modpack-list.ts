@@ -21,6 +21,7 @@ export class ModpackList implements OnInit {
   protected readonly errorMessage = signal('');
   protected readonly showCreateForm = signal(false);
   protected readonly isCreating = signal(false);
+  protected readonly deletingModpackId = signal<number | null>(null);
   protected readonly availableMinecraftVersions = signal<string[]>([]);
   protected readonly availableLoaders = signal<string[]>([]);
 
@@ -112,8 +113,24 @@ export class ModpackList implements OnInit {
             }
           }
         }
+        // TODO: FIX SORT BUG: 1.21.11 < 1.21.2
         this.availableMinecraftVersions.set([...minecraftVersions].sort());
         this.availableLoaders.set([...loaders].sort());
+      },
+    });
+  }
+
+  protected deleteModpack(id: number): void {
+    this.deletingModpackId.set(id);
+    this.errorMessage.set('');
+    this.modpacksApiService.deleteModpack(id).subscribe({
+      next: (): void => {
+        this.deletingModpackId.set(null);
+        this.loadModpacks();
+      },
+      error: (): void => {
+        this.deletingModpackId.set(null);
+        this.errorMessage.set('Failed to delete modpack');
       },
     });
   }

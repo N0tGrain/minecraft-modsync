@@ -5,7 +5,10 @@
   </div>
 
   <div class="header">
-    <h1>My Modpacks</h1>
+    <div class="header-copy">
+      <h1>My Modpacks</h1>
+      <p class="subtitle">Create new modpacks and manage the mods inside them from one place.</p>
+    </div>
     <button type="button" (click)="toggleCreateForm()">
       {{ showCreateForm() ? 'Cancel' : 'Create Modpack' }}
     </button>
@@ -56,7 +59,6 @@
         />
         <datalist id="loader-options">
           @for (loader of availableLoaders(); track loader) {
-<!--            TODO: FIX SORT BUG: 1.21.11 < 1.21.2-->
             <option [value]="loader"></option>
           }
         </datalist>
@@ -91,14 +93,26 @@
 
   <ul class="modpacks-list">
     @for (modpack of modpacks(); track modpack.id) {
-      <li>
-        <a [routerLink]="['/modpacks', modpack.id]">
-          <h2>{{ modpack.name }}</h2>
-          @if (modpack.description) {
-            <p>{{ modpack.description }}</p>
-          }
-          <p class="meta">{{ modpack.minecraftVersion }} · {{ modpack.loader }} · {{ modpack.visibility }}</p>
-        </a>
+      <li class="modpack-card">
+        <div class="modpack-content">
+          <a [routerLink]="['/modpacks', modpack.id]" class="modpack-link">
+            <h2>{{ modpack.name }}</h2>
+            @if (modpack.description) {
+              <p>{{ modpack.description }}</p>
+            }
+            <p class="meta">{{ modpack.minecraftVersion }} · {{ modpack.loader }} · {{ modpack.visibility }}</p>
+          </a>
+          <div class="modpack-actions">
+            <button
+              type="button"
+              class="danger-button"
+              (click)="deleteModpack(modpack.id)"
+              [disabled]="deletingModpackId() === modpack.id"
+            >
+              {{ deletingModpackId() === modpack.id ? 'Deleting...' : 'Delete' }}
+            </button>
+          </div>
+        </div>
       </li>
     }
   </ul>

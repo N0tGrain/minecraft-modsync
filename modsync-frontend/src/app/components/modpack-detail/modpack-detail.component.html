@@ -17,10 +17,19 @@
 
   @if (modpack(); as modpackData) {
     <section class="modpack-info">
-      <h1>{{ modpackData.name }}</h1>
-      @if (modpackData.description) {
-        <p>{{ modpackData.description }}</p>
-      }
+      <div class="info-header">
+        <div>
+          <h1>{{ modpackData.name }}</h1>
+          @if (modpackData.description) {
+            <p>{{ modpackData.description }}</p>
+          }
+        </div>
+        @if (isOwner()) {
+          <button type="button" class="danger-button" (click)="deleteModpack()" [disabled]="deletingModpack()">
+            {{ deletingModpack() ? 'Deleting...' : 'Delete Modpack' }}
+          </button>
+        }
+      </div>
       <p class="meta">
         <strong>Minecraft:</strong> {{ modpackData.minecraftVersion }}
         &nbsp;·&nbsp;<strong>Loader:</strong> {{ modpackData.loader }}
@@ -34,7 +43,7 @@
         <h2>Mods in this modpack</h2>
         @if (isOwner()) {
           <button type="button" (click)="toggleAddMods()">
-            {{ showAddMods() ? 'Add Mods ▲' : 'Add Mods ▼' }}
+            {{ showAddMods() ? 'Manage Mods ▲' : 'Manage Mods ▼' }}
           </button>
         }
       </div>
@@ -42,12 +51,24 @@
       @if (!modpackData.mods || modpackData.mods.length === 0) {
         <p class="empty">No mods added yet.</p>
       } @else {
-        <ul>
+        <ul class="mod-list">
           @for (entry of modpackData.mods; track entry.modVersionId) {
-            <li>
-              {{ entry.modName }} ({{ entry.version }})
-              @if (entry.required) {
-                <span class="badge">Required</span>
+            <li class="mod-entry">
+              <div class="mod-entry-info">
+                <span>{{ entry.modName }} ({{ entry.version }})</span>
+                @if (entry.required) {
+                  <span class="badge">Required</span>
+                }
+              </div>
+              @if (isOwner()) {
+                <button
+                  type="button"
+                  class="danger-button"
+                  (click)="removeModFromModpack(entry)"
+                  [disabled]="removingModId() === entry.modVersionId"
+                >
+                  {{ removingModId() === entry.modVersionId ? 'Removing...' : 'Remove' }}
+                </button>
               }
             </li>
           }
@@ -57,7 +78,7 @@
 
     @if (isOwner() && showAddMods()) {
       <section class="add-mods-section">
-        <h2>Add Mods</h2>
+        <h2>Available Mods</h2>
         <p class="hint">
           Only mods with a version matching {{ modpackData.minecraftVersion }} ({{ modpackData.loader }}) are shown below.
         </p>
